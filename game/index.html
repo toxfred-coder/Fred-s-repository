@@ -342,13 +342,14 @@ class GameScene extends Phaser.Scene {
   mergeCats(catA,catB,level){
     if(!catA.active||!catB.active){ this.merging.delete(catA); this.merging.delete(catB); return; }
     const mx=(catA.x+catB.x)/2,my=(catA.y+catB.y)/2;
+    // destroy and clean up first so any subsequent error can't leave zombie bodies
+    this.cats=this.cats.filter(c=>c!==catA&&c!==catB);
+    catA.destroy(); catB.destroy(); this.merging.delete(catA); this.merging.delete(catB);
     const pts=CATS[level+1].score*10;
     this.score+=pts; this.scoreText.setText(this.score.toString());
     this.showScore(mx,my-20,'+'+pts);
-    this.emitter.setTint(CATS[level].hex); this.emitter.emitParticleAt(mx,my,16);
-    this.starEmitter.emitParticleAt(mx,my,8);
-    this.cats=this.cats.filter(c=>c!==catA&&c!==catB);
-    catA.destroy(); catB.destroy(); this.merging.delete(catA); this.merging.delete(catB);
+    try{ this.emitter.setParticleTint(CATS[level].hex); this.emitter.emitParticleAt(mx,my,16); }catch(e){}
+    try{ this.starEmitter.emitParticleAt(mx,my,8); }catch(e){}
     const nc=this.createCat(mx,my,level+1); nc.setVelocity(0,-5);
     this.tweens.add({targets:nc,scaleX:{from:1.4,to:1},scaleY:{from:1.4,to:1},ease:'Back.Out',duration:260});
     this.cameras.main.shake(80,0.007*(level+1));
