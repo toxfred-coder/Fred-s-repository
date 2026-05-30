@@ -247,11 +247,11 @@
               <div class="row g-2 mb-2">
                 <div class="col-6">
                   <label class="param-label">처리 온도 (°C)</label>
-                  <input type="number" class="form-control form-control-sm" id="mp_temp" value="75">
+                  <input type="number" class="form-control form-control-sm" id="mp_temp" value="65">
                 </div>
                 <div class="col-6">
                   <label class="param-label">처리 시간 (초)</label>
-                  <input type="number" class="form-control form-control-sm" id="mp_time" value="1800">
+                  <input type="number" class="form-control form-control-sm" id="mp_time" value="600">
                 </div>
               </div>
               <div class="mb-2">
@@ -287,16 +287,38 @@
                 <div class="card-body">
                   <div class="section-title">최종 결과 요약</div>
                   <table class="table table-sm table-bordered table-result" id="mp_result_table">
-                    <thead><tr><th>단백질</th><th>비율</th><th>변성률</th><th>잔존(%)</th></tr></thead>
+                    <thead><tr><th>단백질</th><th>초기(mg/mL)</th><th>잔존(mg/mL)</th><th>변성률(%)</th></tr></thead>
                     <tbody id="mp_result_body"></tbody>
                   </table>
-                  <div class="mt-2 p-2 bg-light rounded">
-                    <div class="param-label">가중 평균 변성률</div>
-                    <div class="result-badge bg-danger text-white" id="mp_weighted_denat">-</div>
+                  <div class="formula-box mt-2 mb-2" style="font-size:0.78rem;">
+                    가중평균 = Σ(C₀ᵢ × 잔존률ᵢ) / Σ(C₀ᵢ)<br>
+                    농도(mg/mL) 기준으로 가중합산
                   </div>
-                  <div class="mt-2 p-2 bg-light rounded">
-                    <div class="param-label">가중 평균 잔존 단백질</div>
-                    <div class="result-badge bg-success text-white" id="mp_weighted_native">-</div>
+                  <div class="row g-2">
+                    <div class="col-6">
+                      <div class="p-2 bg-light rounded text-center">
+                        <div class="param-label">전체 초기 농도</div>
+                        <div class="fw-bold text-primary" id="mp_total_C0">-</div>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="p-2 bg-light rounded text-center">
+                        <div class="param-label">전체 잔존 농도</div>
+                        <div class="fw-bold text-success" id="mp_total_native_conc">-</div>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="p-2 bg-light rounded text-center">
+                        <div class="param-label">가중평균 변성률</div>
+                        <div class="result-badge bg-danger text-white" id="mp_weighted_denat">-</div>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="p-2 bg-light rounded text-center">
+                        <div class="param-label">가중평균 잔존률</div>
+                        <div class="result-badge bg-success text-white" id="mp_weighted_native">-</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -781,10 +803,12 @@ function runMixedProtein() {
     });
   });
 
-  // weighted average
-  const totalPct = proteins.reduce((a,p) => a+p.pct, 0);
+  // weighted average by concentration (C0-based)
+  const totalC0 = proteins.reduce((a,p) => a+p.C0, 0);
   const weightedNative = timesMin.map((_,j) => {
-    return datasets.reduce((sum,ds,i) => sum + (proteins[i].pct/totalPct)*ds.data[j], 0);
+    return totalC0 > 0
+      ? datasets.reduce((sum,ds,i) => sum + (proteins[i].C0/totalC0)*ds.data[j], 0)
+      : 0;
   });
   datasets.push({
     label: '가중 평균 (전체)',
@@ -815,9 +839,10 @@ function runMixedProtein() {
   tempDatasets.push({
     label:'가중 평균',
     data: tempRange.map(ct => {
+      if (totalC0 <= 0) return 0;
       return proteins.reduce((sum,p) => {
         const ki = calcK(p.Ea, p.kref, p.Tref, ct);
-        return sum + (p.pct/totalPct)*(1-Math.exp(-ki*tMaxMin))*100;
+        return sum + (p.C0/totalC0)*(1-Math.exp(-ki*tMaxMin))*100;
       },0);
     }),
     borderColor:'#c0392b', borderDash:[5,3], borderWidth:3, tension:0.2, fill:false
@@ -834,17 +859,21 @@ function runMixedProtein() {
   const tbody = document.getElementById('mp_result_body');
   tbody.innerHTML = '';
   finalResults.forEach(r => {
+    const nativeConc = r.C0 * (r.finalNative / 100);
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${r.name}</td><td>${r.pct}%</td>
-      <td class="${r.finalDenat>80?'text-danger fw-bold':r.finalDenat>50?'text-warning':''}">${r.finalDenat.toFixed(1)}%</td>
-      <td>${r.finalNative.toFixed(1)}%</td>`;
+    tr.innerHTML = `<td>${r.name}</td><td>${r.C0.toFixed(1)}</td>
+      <td>${nativeConc.toFixed(2)}</td>
+      <td class="${r.finalDenat>80?'text-danger fw-bold':r.finalDenat>50?'text-warning':''}">${r.finalDenat.toFixed(1)}%</td>`;
     tbody.appendChild(tr);
   });
 
-  const wDenat = finalResults.reduce((s,r) => s+(r.pct/totalPct)*r.finalDenat, 0);
-  const wNative = 100-wDenat;
-  document.getElementById('mp_weighted_denat').textContent  = wDenat.toFixed(1) + '%';
-  document.getElementById('mp_weighted_native').textContent = wNative.toFixed(1) + '%';
+  const totalNativeConc = finalResults.reduce((s,r) => s + r.C0 * (r.finalNative / 100), 0);
+  const wNative = totalC0 > 0 ? (totalNativeConc / totalC0) * 100 : 0;
+  const wDenat  = 100 - wNative;
+  document.getElementById('mp_total_C0').textContent           = totalC0.toFixed(1) + ' mg/mL';
+  document.getElementById('mp_total_native_conc').textContent  = totalNativeConc.toFixed(2) + ' mg/mL';
+  document.getElementById('mp_weighted_denat').textContent     = wDenat.toFixed(1) + '%';
+  document.getElementById('mp_weighted_native').textContent    = wNative.toFixed(1) + '%';
 }
 
 // ============================
