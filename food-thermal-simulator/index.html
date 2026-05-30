@@ -7,30 +7,26 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <style>
-    :root {
-      --primary: #1a6b3c;
-      --secondary: #2d9e5f;
-      --accent: #f0a500;
-      --bg: #f5f7f5;
-      --card: #ffffff;
-    }
-    body { background: var(--bg); font-family: 'Segoe UI', sans-serif; }
-    .navbar { background: var(--primary) !important; }
-    .navbar-brand { font-weight: 700; letter-spacing: 0.5px; }
-    .nav-tabs .nav-link.active { color: var(--primary); font-weight: 600; border-bottom: 3px solid var(--primary); }
-    .nav-tabs .nav-link { color: #555; }
-    .card { border: none; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
-    .card-header { background: var(--primary); color: #fff; border-radius: 12px 12px 0 0 !important; font-weight: 600; }
-    .btn-primary { background: var(--primary); border-color: var(--primary); }
-    .btn-primary:hover { background: var(--secondary); border-color: var(--secondary); }
-    .result-badge { font-size: 1.3rem; font-weight: 700; padding: 0.4rem 1rem; border-radius: 8px; }
-    .info-box { background: #e8f4ee; border-left: 4px solid var(--primary); padding: 0.8rem 1rem; border-radius: 0 8px 8px 0; font-size: 0.88rem; }
-    .formula-box { background: #faf3e0; border: 1px solid #e6c96a; border-radius: 8px; padding: 0.7rem 1rem; font-family: monospace; font-size: 0.9rem; }
-    canvas { max-height: 340px; }
-    .param-label { font-size: 0.82rem; color: #555; font-weight: 600; margin-bottom: 2px; }
-    .section-title { color: var(--primary); font-weight: 700; font-size: 1.05rem; border-bottom: 2px solid #d0e8da; padding-bottom: 4px; margin-bottom: 12px; }
-    .table-result th { background: #e8f4ee; color: var(--primary); }
-    footer { background: var(--primary); color: #cce; font-size: 0.82rem; text-align: center; padding: 1rem; margin-top: 3rem; }
+    :root { --primary:#1a6b3c; --secondary:#2d9e5f; --bg:#f5f7f5; }
+    body { background:var(--bg); font-family:'Segoe UI',sans-serif; }
+    .navbar { background:var(--primary)!important; }
+    .navbar-brand { font-weight:700; }
+    .nav-tabs .nav-link.active { color:var(--primary); font-weight:600; border-bottom:3px solid var(--primary); }
+    .nav-tabs .nav-link { color:#555; }
+    .card { border:none; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.08); }
+    .card-header { background:var(--primary); color:#fff; border-radius:12px 12px 0 0!important; font-weight:600; }
+    .btn-primary { background:var(--primary); border-color:var(--primary); }
+    .btn-primary:hover { background:var(--secondary); border-color:var(--secondary); }
+    .result-badge { font-size:1.3rem; font-weight:700; padding:0.4rem 1rem; border-radius:8px; }
+    .info-box { background:#e8f4ee; border-left:4px solid var(--primary); padding:0.8rem 1rem; border-radius:0 8px 8px 0; font-size:0.88rem; }
+    .formula-box { background:#faf3e0; border:1px solid #e6c96a; border-radius:8px; padding:0.7rem 1rem; font-family:monospace; font-size:0.9rem; }
+    canvas { max-height:340px; }
+    .param-label { font-size:0.82rem; color:#555; font-weight:600; margin-bottom:2px; }
+    .section-title { color:var(--primary); font-weight:700; font-size:1.05rem; border-bottom:2px solid #d0e8da; padding-bottom:4px; margin-bottom:12px; }
+    .table-result th { background:#e8f4ee; color:var(--primary); }
+    footer { background:var(--primary); color:#cce; font-size:0.82rem; text-align:center; padding:1rem; margin-top:3rem; }
+    .protein-row { background:#f8fffe; border:1px solid #c3e6cb; border-radius:8px; padding:10px; margin-bottom:8px; }
+    .pct-badge { font-size:0.75rem; padding:2px 8px; border-radius:12px; }
   </style>
 </head>
 <body>
@@ -45,14 +41,15 @@
 <div class="container-fluid py-3 px-3">
   <ul class="nav nav-tabs mb-3" id="mainTab">
     <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab1">🧬 단백질 열변성</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab2">🦠 미생물 살균 (D/Z값)</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab5">🔀 복합단백질</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab2">🦠 살균 (D/Z값)</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab3">📊 F값 계산기</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab4">🔄 통합 공정 시뮬레이터</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab4">🔄 통합 공정</button></li>
   </ul>
 
   <div class="tab-content">
 
-    <!-- ===== TAB 1: 단백질 열변성 ===== -->
+    <!-- ===== TAB 1: 단백질 열변성 (시간: 초) ===== -->
     <div class="tab-pane fade show active" id="tab1">
       <div class="row g-3">
         <div class="col-md-4">
@@ -78,9 +75,13 @@
                 <div class="d-flex justify-content-between"><span class="small text-muted">40°C</span><strong id="p1_tempVal">75</strong><span class="small text-muted">140°C</span></div>
               </div>
               <div class="mb-3">
-                <label class="param-label">처리 시간 (분)</label>
-                <input type="range" class="form-range" id="p1_time" min="1" max="120" value="30" oninput="document.getElementById('p1_timeVal').textContent=this.value">
-                <div class="d-flex justify-content-between"><span class="small text-muted">1분</span><strong id="p1_timeVal">30</strong><span class="small text-muted">120분</span></div>
+                <label class="param-label">처리 시간 (초)</label>
+                <input type="range" class="form-range" id="p1_time" min="10" max="7200" step="10" value="1800" oninput="p1_updateTimeLabel(this.value)">
+                <div class="d-flex justify-content-between">
+                  <span class="small text-muted">10초</span>
+                  <strong id="p1_timeVal">1800초 (30분)</strong>
+                  <span class="small text-muted">7200초</span>
+                </div>
               </div>
               <hr>
               <div class="section-title">단백질 파라미터 (Arrhenius)</div>
@@ -143,7 +144,166 @@
             </div>
             <div class="col-12">
               <div class="info-box">
-                💡 <strong>해석 기준:</strong> 변성률 &lt;10% → 거의 변성 없음 (native 유지) | 10~50% → 부분 변성 | 50~90% → 상당한 변성 | &gt;90% → 대부분 변성 (기능성 손실)
+                💡 <strong>해석 기준:</strong> 변성률 &lt;10% → 거의 변성 없음 | 10~50% → 부분 변성 | 50~90% → 상당한 변성 | &gt;90% → 대부분 변성 (기능성 손실)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB 5: 복합단백질 ===== -->
+    <div class="tab-pane fade" id="tab5">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="card h-100">
+            <div class="card-header">⚙️ 복합단백질 조성 설정</div>
+            <div class="card-body">
+              <div class="info-box mb-3">
+                여러 단백질이 혼합된 식품(우유, 두유, 계란, 육류 등)의 열변성을 각 성분별로 시뮬레이션합니다. 비율 합계가 100%가 되도록 입력하세요.
+              </div>
+
+              <!-- 단백질 1 -->
+              <div class="protein-row">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="fw-bold text-success small">단백질 ① </span>
+                  <span class="pct-badge bg-success text-white" id="mp_pct1_badge">50%</span>
+                </div>
+                <div class="row g-1">
+                  <div class="col-12">
+                    <select class="form-select form-select-sm" id="mp_p1" onchange="mp_loadProtein(1)">
+                      <option value="betalac">β-lactoglobulin</option>
+                      <option value="alphalac">α-lactalbumin</option>
+                      <option value="ovalbumin">Ovalbumin</option>
+                      <option value="myosin">Myosin</option>
+                      <option value="collagen">Collagen</option>
+                      <option value="soy">Soy Protein</option>
+                      <option value="casein">Casein</option>
+                    </select>
+                  </div>
+                  <div class="col-4"><label class="param-label">비율(%)</label><input type="number" class="form-control form-control-sm" id="mp_pct1" value="50" min="0" max="100" oninput="mp_updateBadge(1,this.value)"></div>
+                  <div class="col-4"><label class="param-label">Ea(kJ/mol)</label><input type="number" class="form-control form-control-sm" id="mp_Ea1" value="260"></div>
+                  <div class="col-4"><label class="param-label">k_ref(min⁻¹)</label><input type="number" class="form-control form-control-sm" id="mp_kref1" value="0.08" step="0.001"></div>
+                  <div class="col-6"><label class="param-label">Tref(°C)</label><input type="number" class="form-control form-control-sm" id="mp_Tref1" value="75"></div>
+                  <div class="col-6"><label class="param-label">농도(mg/mL)</label><input type="number" class="form-control form-control-sm" id="mp_C1" value="5"></div>
+                </div>
+              </div>
+
+              <!-- 단백질 2 -->
+              <div class="protein-row">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="fw-bold text-primary small">단백질 ② </span>
+                  <span class="pct-badge bg-primary text-white" id="mp_pct2_badge">30%</span>
+                </div>
+                <div class="row g-1">
+                  <div class="col-12">
+                    <select class="form-select form-select-sm" id="mp_p2" onchange="mp_loadProtein(2)">
+                      <option value="betalac">β-lactoglobulin</option>
+                      <option value="alphalac" selected>α-lactalbumin</option>
+                      <option value="ovalbumin">Ovalbumin</option>
+                      <option value="myosin">Myosin</option>
+                      <option value="collagen">Collagen</option>
+                      <option value="soy">Soy Protein</option>
+                      <option value="casein">Casein</option>
+                    </select>
+                  </div>
+                  <div class="col-4"><label class="param-label">비율(%)</label><input type="number" class="form-control form-control-sm" id="mp_pct2" value="30" min="0" max="100" oninput="mp_updateBadge(2,this.value)"></div>
+                  <div class="col-4"><label class="param-label">Ea(kJ/mol)</label><input type="number" class="form-control form-control-sm" id="mp_Ea2" value="280"></div>
+                  <div class="col-4"><label class="param-label">k_ref(min⁻¹)</label><input type="number" class="form-control form-control-sm" id="mp_kref2" value="0.05" step="0.001"></div>
+                  <div class="col-6"><label class="param-label">Tref(°C)</label><input type="number" class="form-control form-control-sm" id="mp_Tref2" value="65"></div>
+                  <div class="col-6"><label class="param-label">농도(mg/mL)</label><input type="number" class="form-control form-control-sm" id="mp_C2" value="3"></div>
+                </div>
+              </div>
+
+              <!-- 단백질 3 -->
+              <div class="protein-row">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="fw-bold text-warning small">단백질 ③ </span>
+                  <span class="pct-badge bg-warning text-dark" id="mp_pct3_badge">20%</span>
+                </div>
+                <div class="row g-1">
+                  <div class="col-12">
+                    <select class="form-select form-select-sm" id="mp_p3" onchange="mp_loadProtein(3)">
+                      <option value="betalac">β-lactoglobulin</option>
+                      <option value="alphalac">α-lactalbumin</option>
+                      <option value="ovalbumin">Ovalbumin</option>
+                      <option value="myosin">Myosin</option>
+                      <option value="collagen">Collagen</option>
+                      <option value="soy">Soy Protein</option>
+                      <option value="casein" selected>Casein</option>
+                    </select>
+                  </div>
+                  <div class="col-4"><label class="param-label">비율(%)</label><input type="number" class="form-control form-control-sm" id="mp_pct3" value="20" min="0" max="100" oninput="mp_updateBadge(3,this.value)"></div>
+                  <div class="col-4"><label class="param-label">Ea(kJ/mol)</label><input type="number" class="form-control form-control-sm" id="mp_Ea3" value="80"></div>
+                  <div class="col-4"><label class="param-label">k_ref(min⁻¹)</label><input type="number" class="form-control form-control-sm" id="mp_kref3" value="0.002" step="0.0001"></div>
+                  <div class="col-6"><label class="param-label">Tref(°C)</label><input type="number" class="form-control form-control-sm" id="mp_Tref3" value="80"></div>
+                  <div class="col-6"><label class="param-label">농도(mg/mL)</label><input type="number" class="form-control form-control-sm" id="mp_C3" value="2"></div>
+                </div>
+              </div>
+
+              <div id="mp_pct_warn" class="text-danger small mb-2" style="display:none;">⚠️ 비율 합계가 100%가 아닙니다.</div>
+
+              <hr>
+              <div class="row g-2 mb-2">
+                <div class="col-6">
+                  <label class="param-label">처리 온도 (°C)</label>
+                  <input type="number" class="form-control form-control-sm" id="mp_temp" value="75">
+                </div>
+                <div class="col-6">
+                  <label class="param-label">처리 시간 (초)</label>
+                  <input type="number" class="form-control form-control-sm" id="mp_time" value="1800">
+                </div>
+              </div>
+              <div class="mb-2">
+                <label class="param-label">빠른 프리셋</label>
+                <div class="d-flex gap-1 flex-wrap">
+                  <button class="btn btn-sm btn-outline-secondary" onclick="mp_preset('milk')">우유</button>
+                  <button class="btn btn-sm btn-outline-secondary" onclick="mp_preset('egg')">달걀</button>
+                  <button class="btn btn-sm btn-outline-secondary" onclick="mp_preset('pork')">돼지고기</button>
+                  <button class="btn btn-sm btn-outline-secondary" onclick="mp_preset('soy')">두유</button>
+                </div>
+              </div>
+              <button class="btn btn-primary w-100 mt-2" onclick="runMixedProtein()">▶ 복합 시뮬레이션 실행</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-8">
+          <div class="row g-3">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">📈 각 단백질별 변성률 (시간 경과)</div>
+                <div class="card-body"><canvas id="chart_mixed"></canvas></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header">🌡️ 온도별 최종 변성률 비교</div>
+                <div class="card-body"><canvas id="chart_mixed_temp"></canvas></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-body">
+                  <div class="section-title">최종 결과 요약</div>
+                  <table class="table table-sm table-bordered table-result" id="mp_result_table">
+                    <thead><tr><th>단백질</th><th>비율</th><th>변성률</th><th>잔존(%)</th></tr></thead>
+                    <tbody id="mp_result_body"></tbody>
+                  </table>
+                  <div class="mt-2 p-2 bg-light rounded">
+                    <div class="param-label">가중 평균 변성률</div>
+                    <div class="result-badge bg-danger text-white" id="mp_weighted_denat">-</div>
+                  </div>
+                  <div class="mt-2 p-2 bg-light rounded">
+                    <div class="param-label">가중 평균 잔존 단백질</div>
+                    <div class="result-badge bg-success text-white" id="mp_weighted_native">-</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="info-box">
+                💡 <strong>복합단백질 해석:</strong> 각 단백질은 열안정성이 다르므로 같은 온도·시간에서 변성 정도가 다릅니다. 가중 평균은 전체 단백질 혼합물의 평균 변성률을 나타냅니다.
               </div>
             </div>
           </div>
@@ -184,22 +344,10 @@
               <hr>
               <div class="section-title">D/Z값 파라미터</div>
               <div class="row g-2">
-                <div class="col-6">
-                  <label class="param-label">D값 (분) @ Tref</label>
-                  <input type="number" class="form-control form-control-sm" id="m1_Dref" value="0.5" step="0.01">
-                </div>
-                <div class="col-6">
-                  <label class="param-label">기준온도 Tref (°C)</label>
-                  <input type="number" class="form-control form-control-sm" id="m1_Tref" value="70">
-                </div>
-                <div class="col-6">
-                  <label class="param-label">Z값 (°C)</label>
-                  <input type="number" class="form-control form-control-sm" id="m1_Z" value="5.0" step="0.5">
-                </div>
-                <div class="col-6">
-                  <label class="param-label">초기 균수 N₀ (CFU/g)</label>
-                  <input type="number" class="form-control form-control-sm" id="m1_N0" value="1000000">
-                </div>
+                <div class="col-6"><label class="param-label">D값 (분) @ Tref</label><input type="number" class="form-control form-control-sm" id="m1_Dref" value="0.5" step="0.01"></div>
+                <div class="col-6"><label class="param-label">기준온도 Tref (°C)</label><input type="number" class="form-control form-control-sm" id="m1_Tref" value="70"></div>
+                <div class="col-6"><label class="param-label">Z값 (°C)</label><input type="number" class="form-control form-control-sm" id="m1_Z" value="5.0" step="0.5"></div>
+                <div class="col-6"><label class="param-label">초기 균수 N₀ (CFU/g)</label><input type="number" class="form-control form-control-sm" id="m1_N0" value="1000000"></div>
               </div>
               <button class="btn btn-primary w-100 mt-3" onclick="runSterilization()">▶ 살균 계산 실행</button>
             </div>
@@ -230,11 +378,7 @@
                     <tr><th>감소율</th><td id="r2_pct">-</td></tr>
                     <tr><th>살균 적정성</th><td id="r2_pass">-</td></tr>
                   </table>
-                  <div class="formula-box">
-                    D(T) = D_ref · 10^((Tref − T) / Z)<br>
-                    log(N/N₀) = −t / D(T)<br>
-                    N = N₀ · 10^(−t/D(T))
-                  </div>
+                  <div class="formula-box">D(T)=D_ref·10^((Tref−T)/Z)<br>log(N/N₀)=−t/D(T)</div>
                 </div>
               </div>
             </div>
@@ -242,8 +386,8 @@
               <div class="card">
                 <div class="card-body">
                   <div class="section-title">온도-살균시간 대조표</div>
-                  <div style="max-height:220px; overflow-y:auto;">
-                    <table class="table table-sm table-hover table-result" id="m1_table">
+                  <div style="max-height:220px;overflow-y:auto;">
+                    <table class="table table-sm table-hover table-result">
                       <thead><tr><th>온도(°C)</th><th>D값(분)</th><th>6-log 달성시간</th></tr></thead>
                       <tbody id="m1_tableBody"></tbody>
                     </table>
@@ -252,9 +396,7 @@
               </div>
             </div>
             <div class="col-12">
-              <div class="info-box">
-                💡 <strong>살균 기준:</strong> 식품위생법상 살모넬라 기준 7D 감소 (N₀≤10⁶ → N≤1) | 저산성 통조림(pH&gt;4.6)은 C.botulinum 기준 12D(F₀≥3분) | 우유 파스퇴라이제이션 기준: 63°C/30분 또는 72°C/15초
-              </div>
+              <div class="info-box">💡 <strong>살균 기준:</strong> 살모넬라 7D 감소 | 저산성 통조림 C.botulinum 12D(F₀≥3분) | 우유: 63°C/30분 or 72°C/15초</div>
             </div>
           </div>
         </div>
@@ -276,18 +418,12 @@
                 </select>
               </div>
               <div id="f1_const_block">
-                <div class="mb-2">
-                  <label class="param-label">처리 온도 (°C)</label>
-                  <input type="number" class="form-control form-control-sm" id="f1_temp" value="121.1">
-                </div>
-                <div class="mb-2">
-                  <label class="param-label">처리 시간 (분)</label>
-                  <input type="number" class="form-control form-control-sm" id="f1_time" value="15">
-                </div>
+                <div class="mb-2"><label class="param-label">처리 온도 (°C)</label><input type="number" class="form-control form-control-sm" id="f1_temp" value="121.1"></div>
+                <div class="mb-2"><label class="param-label">처리 시간 (분)</label><input type="number" class="form-control form-control-sm" id="f1_time" value="15"></div>
               </div>
               <div id="f1_step_block" style="display:none;">
-                <div class="info-box mb-2">시간(분), 온도(°C) 순서로 쉼표 구분 입력.<br>각 행이 하나의 단계입니다.</div>
-                <textarea class="form-control form-control-sm font-monospace" id="f1_profile" rows="8" placeholder="예시:&#10;0, 20&#10;5, 60&#10;10, 90&#10;15, 121&#10;30, 121&#10;35, 90&#10;40, 60&#10;45, 25">0, 20
+                <div class="info-box mb-2">시간(분), 온도(°C) 쉼표 구분 입력</div>
+                <textarea class="form-control form-control-sm font-monospace" id="f1_profile" rows="8">0, 20
 5, 60
 10, 90
 15, 121
@@ -297,24 +433,14 @@
 45, 25</textarea>
               </div>
               <hr>
-              <div class="section-title">기준 파라미터</div>
               <div class="row g-2">
-                <div class="col-6">
-                  <label class="param-label">기준온도 Tref (°C)</label>
-                  <input type="number" class="form-control form-control-sm" id="f1_Tref" value="121.1">
-                </div>
-                <div class="col-6">
-                  <label class="param-label">Z값 (°C)</label>
-                  <input type="number" class="form-control form-control-sm" id="f1_Z" value="10">
-                </div>
+                <div class="col-6"><label class="param-label">기준온도 Tref (°C)</label><input type="number" class="form-control form-control-sm" id="f1_Tref" value="121.1"></div>
+                <div class="col-6"><label class="param-label">Z값 (°C)</label><input type="number" class="form-control form-control-sm" id="f1_Z" value="10"></div>
               </div>
-              <div class="mt-2">
-                <label class="param-label">빠른 설정</label>
-                <div class="d-flex gap-1 flex-wrap">
-                  <button class="btn btn-sm btn-outline-secondary" onclick="f1_preset('steril')">살균(F₀)</button>
-                  <button class="btn btn-sm btn-outline-secondary" onclick="f1_preset('past')">파스퇴라이제이션(P)</button>
-                  <button class="btn btn-sm btn-outline-secondary" onclick="f1_preset('cook')">조리살균</button>
-                </div>
+              <div class="mt-2 d-flex gap-1 flex-wrap">
+                <button class="btn btn-sm btn-outline-secondary" onclick="f1_preset('steril')">살균(F₀)</button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="f1_preset('past')">파스퇴라이제이션</button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="f1_preset('cook')">조리살균</button>
               </div>
               <button class="btn btn-primary w-100 mt-3" onclick="runFvalue()">▶ F값 계산</button>
             </div>
@@ -343,10 +469,7 @@
                     <tr><th>최고 온도</th><td id="r3_maxTemp">-</td></tr>
                     <tr><th>살균 적정성</th><td id="r3_pass">-</td></tr>
                   </table>
-                  <div class="formula-box mt-2">
-                    F = ∫₀ᵗ 10^((T(t)−Tref)/Z) dt<br>
-                    등온: F = t · 10^((T−Tref)/Z)
-                  </div>
+                  <div class="formula-box mt-2">F=∫10^((T−Tref)/Z)dt</div>
                 </div>
               </div>
             </div>
@@ -355,17 +478,14 @@
                 <div class="card-body">
                   <div class="section-title">F값 기준 해석</div>
                   <table class="table table-sm table-bordered table-result">
-                    <thead><tr><th>공정 유형</th><th>Tref</th><th>Z</th><th>기준값</th><th>대상균</th></tr></thead>
+                    <thead><tr><th>공정</th><th>Tref</th><th>Z</th><th>기준</th></tr></thead>
                     <tbody>
-                      <tr><td>상업적 살균 (F₀)</td><td>121.1°C</td><td>10°C</td><td class="text-danger fw-bold">F₀ ≥ 3</td><td>C.botulinum</td></tr>
-                      <tr><td>저온 살균 (P값)</td><td>70°C</td><td>5°C</td><td class="text-warning fw-bold">P ≥ 35</td><td>Salmonella (7D)</td></tr>
-                      <tr><td>우유 HTST</td><td>72°C</td><td>7°C</td><td>P ≥ 0.25</td><td>Listeria</td></tr>
-                      <tr><td>통조림 연산</td><td>121.1°C</td><td>10°C</td><td>F₀ ≥ 6~12</td><td>B.stearothermoph.</td></tr>
+                      <tr><td>상업적 살균(F₀)</td><td>121.1°C</td><td>10°C</td><td class="text-danger fw-bold">F₀≥3</td></tr>
+                      <tr><td>저온 살균(P값)</td><td>70°C</td><td>5°C</td><td class="text-warning fw-bold">P≥35</td></tr>
+                      <tr><td>우유 HTST</td><td>72°C</td><td>7°C</td><td>P≥0.25</td></tr>
+                      <tr><td>통조림</td><td>121.1°C</td><td>10°C</td><td>F₀≥6~12</td></tr>
                     </tbody>
                   </table>
-                  <div class="info-box mt-2">
-                    💡 F₀ = 1 → 121.1°C에서 1분 처리와 동등한 살균 효과. F₀ ≥ 3은 국제 기준(FAO/WHO, FDA)으로 C.botulinum 12D 감소를 보장합니다.
-                  </div>
                 </div>
               </div>
             </div>
@@ -374,27 +494,26 @@
       </div>
     </div>
 
-    <!-- ===== TAB 4: 통합 공정 시뮬레이터 ===== -->
+    <!-- ===== TAB 4: 통합 공정 ===== -->
     <div class="tab-pane fade" id="tab4">
       <div class="row g-3">
         <div class="col-md-4">
           <div class="card h-100">
             <div class="card-header">⚙️ 공정 프로파일 설정</div>
             <div class="card-body">
-              <div class="section-title">열처리 단계 (승온-유지-냉각)</div>
+              <div class="section-title">열처리 단계</div>
               <div class="row g-2 mb-2">
-                <div class="col-6"><label class="param-label">초기온도 (°C)</label><input type="number" class="form-control form-control-sm" id="i1_T0" value="20"></div>
-                <div class="col-6"><label class="param-label">승온시간 (분)</label><input type="number" class="form-control form-control-sm" id="i1_ramp" value="10"></div>
-                <div class="col-6"><label class="param-label">유지온도 (°C)</label><input type="number" class="form-control form-control-sm" id="i1_Thold" value="90"></div>
-                <div class="col-6"><label class="param-label">유지시간 (분)</label><input type="number" class="form-control form-control-sm" id="i1_hold" value="15"></div>
-                <div class="col-6"><label class="param-label">냉각목표온도 (°C)</label><input type="number" class="form-control form-control-sm" id="i1_Tend" value="20"></div>
-                <div class="col-6"><label class="param-label">냉각시간 (분)</label><input type="number" class="form-control form-control-sm" id="i1_cool" value="15"></div>
+                <div class="col-6"><label class="param-label">초기온도(°C)</label><input type="number" class="form-control form-control-sm" id="i1_T0" value="20"></div>
+                <div class="col-6"><label class="param-label">승온시간(분)</label><input type="number" class="form-control form-control-sm" id="i1_ramp" value="10"></div>
+                <div class="col-6"><label class="param-label">유지온도(°C)</label><input type="number" class="form-control form-control-sm" id="i1_Thold" value="90"></div>
+                <div class="col-6"><label class="param-label">유지시간(분)</label><input type="number" class="form-control form-control-sm" id="i1_hold" value="15"></div>
+                <div class="col-6"><label class="param-label">냉각목표(°C)</label><input type="number" class="form-control form-control-sm" id="i1_Tend" value="20"></div>
+                <div class="col-6"><label class="param-label">냉각시간(분)</label><input type="number" class="form-control form-control-sm" id="i1_cool" value="15"></div>
               </div>
               <hr>
               <div class="section-title">단백질 파라미터</div>
               <div class="row g-2 mb-2">
                 <div class="col-12">
-                  <label class="param-label">단백질</label>
                   <select class="form-select form-select-sm" id="i1_protein" onchange="i1_proteinChange()">
                     <option value="betalac">β-lactoglobulin</option>
                     <option value="alphalac">α-lactalbumin</option>
@@ -404,17 +523,17 @@
                     <option value="soy">Soy Protein</option>
                   </select>
                 </div>
-                <div class="col-6"><label class="param-label">Ea (kJ/mol)</label><input type="number" class="form-control form-control-sm" id="i1_Ea" value="260"></div>
-                <div class="col-6"><label class="param-label">k_ref (min⁻¹)</label><input type="number" class="form-control form-control-sm" id="i1_kref" value="0.08" step="0.001"></div>
-                <div class="col-6"><label class="param-label">Tref (°C)</label><input type="number" class="form-control form-control-sm" id="i1_Tref_p" value="75"></div>
+                <div class="col-6"><label class="param-label">Ea(kJ/mol)</label><input type="number" class="form-control form-control-sm" id="i1_Ea" value="260"></div>
+                <div class="col-6"><label class="param-label">k_ref(min⁻¹)</label><input type="number" class="form-control form-control-sm" id="i1_kref" value="0.08" step="0.001"></div>
+                <div class="col-6"><label class="param-label">Tref(°C)</label><input type="number" class="form-control form-control-sm" id="i1_Tref_p" value="75"></div>
               </div>
               <hr>
               <div class="section-title">살균 파라미터</div>
               <div class="row g-2 mb-2">
-                <div class="col-6"><label class="param-label">D_ref (분)</label><input type="number" class="form-control form-control-sm" id="i1_Dref" value="0.5" step="0.01"></div>
-                <div class="col-6"><label class="param-label">Tref_m (°C)</label><input type="number" class="form-control form-control-sm" id="i1_Tref_m" value="70"></div>
-                <div class="col-6"><label class="param-label">Z값 (°C)</label><input type="number" class="form-control form-control-sm" id="i1_Z" value="5"></div>
-                <div class="col-6"><label class="param-label">N₀ (CFU/g)</label><input type="number" class="form-control form-control-sm" id="i1_N0" value="1000000"></div>
+                <div class="col-6"><label class="param-label">D_ref(분)</label><input type="number" class="form-control form-control-sm" id="i1_Dref" value="0.5" step="0.01"></div>
+                <div class="col-6"><label class="param-label">Tref_m(°C)</label><input type="number" class="form-control form-control-sm" id="i1_Tref_m" value="70"></div>
+                <div class="col-6"><label class="param-label">Z값(°C)</label><input type="number" class="form-control form-control-sm" id="i1_Z" value="5"></div>
+                <div class="col-6"><label class="param-label">N₀(CFU/g)</label><input type="number" class="form-control form-control-sm" id="i1_N0" value="1000000"></div>
               </div>
               <button class="btn btn-primary w-100 mt-2" onclick="runIntegrated()">▶ 통합 시뮬레이션 실행</button>
             </div>
@@ -424,14 +543,14 @@
           <div class="row g-3">
             <div class="col-12">
               <div class="card">
-                <div class="card-header">📈 온도 프로파일 + 단백질 변성률 + 생존 균수</div>
+                <div class="card-header">📈 온도 + 단백질 변성률 + 생존 균수</div>
                 <div class="card-body"><canvas id="chart_integrated" style="max-height:300px;"></canvas></div>
               </div>
             </div>
             <div class="col-md-6">
               <div class="card">
                 <div class="card-body">
-                  <div class="section-title">공정 종료 후 결과</div>
+                  <div class="section-title">공정 종료 결과</div>
                   <table class="table table-sm table-bordered table-result">
                     <tr><th>최고 온도</th><td id="r4_maxT">-</td></tr>
                     <tr><th>총 처리 시간</th><td id="r4_totalT">-</td></tr>
@@ -439,8 +558,8 @@
                     <tr><th>잔존 네이티브 단백질</th><td id="r4_native">-</td></tr>
                     <tr><th>살균 log 감소</th><td id="r4_logred">-</td></tr>
                     <tr><th>최종 생존 균수</th><td id="r4_N">-</td></tr>
-                    <tr><th>F₀ (121.1°C 기준)</th><td id="r4_F0">-</td></tr>
-                    <tr><th>P값 (70°C 기준)</th><td id="r4_P">-</td></tr>
+                    <tr><th>F₀ (121.1°C)</th><td id="r4_F0">-</td></tr>
+                    <tr><th>P값 (70°C)</th><td id="r4_P">-</td></tr>
                   </table>
                 </div>
               </div>
@@ -449,9 +568,7 @@
               <div class="card">
                 <div class="card-body">
                   <div class="section-title">공정 최적화 제안</div>
-                  <div id="r4_suggest" class="small">
-                    <p class="text-muted">시뮬레이션을 실행하면 최적화 제안이 나타납니다.</p>
-                  </div>
+                  <div id="r4_suggest" class="small"><p class="text-muted">시뮬레이션 실행 후 표시됩니다.</p></div>
                 </div>
               </div>
             </div>
@@ -460,136 +577,278 @@
       </div>
     </div>
 
-  </div><!-- tab-content end -->
-</div><!-- container end -->
+  </div>
+</div>
 
 <footer>
-  식품 열처리 시뮬레이터 | 수학적 모델: Arrhenius 열변성 + Bigelow D/Z 살균 모델 + F값 적분법<br>
-  본 시뮬레이터는 연구·교육 목적으로 제공되며, 실제 공정 검증은 반드시 별도 실험을 통해 확인하십시오.
+  식품 열처리 시뮬레이터 | Arrhenius 열변성 + Bigelow D/Z 살균 모델 + F값 적분법<br>
+  본 시뮬레이터는 연구·교육 목적으로 제공되며, 실제 공정 검증은 실험으로 확인하십시오.
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 
-// ============================
-// PROTEIN DATABASE
-// ============================
 const PROTEINS = {
-  betalac:  { name:"β-lactoglobulin",  Ea:260000, kref:0.08,  Tref:75 },
-  alphalac: { name:"α-lactalbumin",    Ea:280000, kref:0.05,  Tref:65 },
-  ovalbumin:{ name:"Ovalbumin",        Ea:350000, kref:0.03,  Tref:80 },
-  myosin:   { name:"Myosin",           Ea:400000, kref:0.20,  Tref:55 },
-  collagen: { name:"Collagen",         Ea:200000, kref:0.10,  Tref:60 },
-  soy:      { name:"Soy Protein",      Ea:230000, kref:0.06,  Tref:75 },
-  casein:   { name:"Casein",           Ea:80000,  kref:0.002, Tref:80 },
+  betalac:  { name:"β-lactoglobulin", Ea:260000, kref:0.08,  Tref:75 },
+  alphalac: { name:"α-lactalbumin",   Ea:280000, kref:0.05,  Tref:65 },
+  ovalbumin:{ name:"Ovalbumin",       Ea:350000, kref:0.03,  Tref:80 },
+  myosin:   { name:"Myosin",          Ea:400000, kref:0.20,  Tref:55 },
+  collagen: { name:"Collagen",        Ea:200000, kref:0.10,  Tref:60 },
+  soy:      { name:"Soy Protein",     Ea:230000, kref:0.06,  Tref:75 },
+  casein:   { name:"Casein",          Ea:80000,  kref:0.002, Tref:80 },
 };
 
-// ============================
-// MICROORGANISM DATABASE
-// ============================
 const BUGS = {
-  salmonella: { name:"Salmonella spp.",         Dref:0.5,  Tref:70,  Z:5.0  },
-  listeria:   { name:"Listeria monocytogenes",  Dref:2.0,  Tref:70,  Z:7.0  },
-  ecoli:      { name:"E. coli O157:H7",         Dref:0.4,  Tref:70,  Z:5.0  },
-  clostbot:   { name:"C. botulinum (포자)",     Dref:0.21, Tref:121, Z:10.0 },
-  clostperf:  { name:"C. perfringens",          Dref:3.0,  Tref:75,  Z:8.0  },
-  bcereus:    { name:"B. cereus (포자)",        Dref:5.0,  Tref:95,  Z:9.0  },
-  bstear:     { name:"B. stearothermophilus",   Dref:4.5,  Tref:121, Z:10.0 },
+  salmonella:{ name:"Salmonella spp.",        Dref:0.5,  Tref:70,  Z:5.0  },
+  listeria:  { name:"Listeria monocytogenes", Dref:2.0,  Tref:70,  Z:7.0  },
+  ecoli:     { name:"E. coli O157:H7",        Dref:0.4,  Tref:70,  Z:5.0  },
+  clostbot:  { name:"C. botulinum (포자)",    Dref:0.21, Tref:121, Z:10.0 },
+  clostperf: { name:"C. perfringens",         Dref:3.0,  Tref:75,  Z:8.0  },
+  bcereus:   { name:"B. cereus (포자)",       Dref:5.0,  Tref:95,  Z:9.0  },
+  bstear:    { name:"B. stearothermophilus",  Dref:4.5,  Tref:121, Z:10.0 },
 };
 
 const R_GAS = 8.314;
-
-// ============================
-// CHART INSTANCES
-// ============================
 let charts = {};
 
 function getOrCreateChart(id, config) {
-  if (charts[id]) { charts[id].destroy(); }
-  const ctx = document.getElementById(id).getContext('2d');
-  charts[id] = new Chart(ctx, config);
+  if (charts[id]) charts[id].destroy();
+  charts[id] = new Chart(document.getElementById(id).getContext('2d'), config);
   return charts[id];
 }
 
+function calcK(Ea_J, kref, Tref_C, T_C) {
+  return kref * Math.exp((Ea_J / R_GAS) * (1/(Tref_C+273.15) - 1/(T_C+273.15)));
+}
+
+function calcD(Dref, Tref, Z, T) {
+  return Dref * Math.pow(10, (Tref - T) / Z);
+}
+
 // ============================
-// TAB 1: PROTEIN DENATURATION
+// TAB 1: 단백질 열변성 (초 단위)
 // ============================
+function p1_updateTimeLabel(val) {
+  const sec = parseInt(val);
+  const min = (sec/60).toFixed(1);
+  document.getElementById('p1_timeVal').textContent = sec + '초 (' + min + '분)';
+}
+
 function p1_onProteinChange() {
   const key = document.getElementById('p1_protein').value;
   if (key === 'custom') return;
   const p = PROTEINS[key];
-  document.getElementById('p1_Ea').value   = p.Ea / 1000;
+  document.getElementById('p1_Ea').value   = p.Ea/1000;
   document.getElementById('p1_Tref').value = p.Tref;
   document.getElementById('p1_kref').value = p.kref;
 }
 
-function calcK(Ea_J, kref, Tref_C, T_C) {
-  const Tref_K = Tref_C + 273.15;
-  const T_K    = T_C   + 273.15;
-  return kref * Math.exp((Ea_J / R_GAS) * (1/Tref_K - 1/T_K));
-}
-
 function runDenaturation() {
-  const T    = parseFloat(document.getElementById('p1_temp').value);
-  const tMax = parseFloat(document.getElementById('p1_time').value);
-  const Ea   = parseFloat(document.getElementById('p1_Ea').value) * 1000;
-  const Tref = parseFloat(document.getElementById('p1_Tref').value);
-  const kref = parseFloat(document.getElementById('p1_kref').value);
-  const C0   = parseFloat(document.getElementById('p1_C0').value);
+  const T       = parseFloat(document.getElementById('p1_temp').value);
+  const tMaxSec = parseFloat(document.getElementById('p1_time').value);
+  const tMaxMin = tMaxSec / 60;
+  const Ea      = parseFloat(document.getElementById('p1_Ea').value) * 1000;
+  const Tref    = parseFloat(document.getElementById('p1_Tref').value);
+  const kref    = parseFloat(document.getElementById('p1_kref').value);
+  const C0      = parseFloat(document.getElementById('p1_C0').value);
 
-  const k = calcK(Ea, kref, Tref, T);
-  const half = Math.LN2 / k;
+  const k    = calcK(Ea, kref, Tref, T);
+  const half = Math.LN2 / k; // in minutes
 
-  // time series
-  const steps = 100;
-  const times = Array.from({length: steps+1}, (_, i) => (i/steps)*tMax);
-  const nativePct = times.map(t => Math.exp(-k*t) * 100);
-  const denatPct  = nativePct.map(v => 100 - v);
+  const steps = 120;
+  const timesMin = Array.from({length:steps+1}, (_,i) => (i/steps)*tMaxMin);
+  const timesSec = timesMin.map(t => t*60);
+  const nativePct = timesMin.map(t => Math.exp(-k*t)*100);
+  const denatPct  = nativePct.map(v => 100-v);
 
-  const finalNative = Math.exp(-k*tMax) * 100;
-  const finalDenat  = 100 - finalNative;
+  const finalNative = Math.exp(-k*tMaxMin)*100;
+  const halfSec = half*60;
 
   document.getElementById('r1_temp').textContent   = T + ' °C';
-  document.getElementById('r1_time').textContent   = tMax + ' 분';
+  document.getElementById('r1_time').textContent   = tMaxSec + '초 (' + tMaxMin.toFixed(1) + '분)';
   document.getElementById('r1_k').textContent      = k.toExponential(3) + ' min⁻¹';
-  document.getElementById('r1_half').textContent   = half < 60 ? half.toFixed(2)+' 분' : (half/60).toFixed(2)+' 시간';
+  document.getElementById('r1_half').textContent   = halfSec < 3600 ? halfSec.toFixed(0)+'초 ('+half.toFixed(1)+'분)' : (half/60).toFixed(2)+'시간';
   document.getElementById('r1_native').textContent = finalNative.toFixed(1) + '%';
-  document.getElementById('r1_denat').textContent  = finalDenat.toFixed(1) + '%';
-  document.getElementById('r1_conc').textContent   = (C0 * finalNative/100).toFixed(2) + ' mg/mL';
+  document.getElementById('r1_denat').textContent  = (100-finalNative).toFixed(1) + '%';
+  document.getElementById('r1_conc').textContent   = (C0*finalNative/100).toFixed(2) + ' mg/mL';
 
   getOrCreateChart('chart_denat', {
-    type: 'line',
-    data: {
-      labels: times.map(t => t.toFixed(1)),
-      datasets: [
-        { label:'네이티브 단백질 (%)', data: nativePct, borderColor:'#1a6b3c', backgroundColor:'rgba(26,107,60,0.08)', tension:0.3, fill:true },
-        { label:'변성 단백질 (%)',     data: denatPct,  borderColor:'#e05c00', backgroundColor:'rgba(224,92,0,0.08)',   tension:0.3, fill:true },
-      ]
-    },
-    options: { responsive:true, plugins:{ legend:{ position:'top' } }, scales:{ x:{title:{display:true,text:'시간 (분)'}}, y:{min:0,max:100,title:{display:true,text:'비율 (%)'}} } }
+    type:'line',
+    data:{ labels: timesSec.map(t => t.toFixed(0)+'초'),
+      datasets:[
+        { label:'네이티브 단백질(%)', data:nativePct, borderColor:'#1a6b3c', backgroundColor:'rgba(26,107,60,0.08)', tension:0.3, fill:true },
+        { label:'변성 단백질(%)',     data:denatPct,  borderColor:'#e05c00', backgroundColor:'rgba(224,92,0,0.08)',   tension:0.3, fill:true },
+      ]},
+    options:{ responsive:true, plugins:{legend:{position:'top'}},
+      scales:{ x:{title:{display:true,text:'시간 (초)'}}, y:{min:0,max:100,title:{display:true,text:'비율 (%)'}} } }
   });
 
-  // temp comparison chart
-  const compareTemps = [T-20, T-10, T, T+10, T+20].filter(t => t >= 40 && t <= 140);
-  const compareColors = ['#8ecfc9','#54becc','#1a6b3c','#e05c00','#b22222'];
-  const datasets = compareTemps.map((ct, i) => {
-    const ki = calcK(Ea, kref, Tref, ct);
-    return {
-      label: ct + '°C',
-      data: times.map(t => (1 - Math.exp(-ki*t))*100),
-      borderColor: compareColors[i] || '#555',
-      tension: 0.3, fill:false
-    };
-  });
+  const compareTemps = [T-20,T-10,T,T+10,T+20].filter(t => t>=40 && t<=140);
+  const colors = ['#8ecfc9','#54becc','#1a6b3c','#e05c00','#b22222'];
   getOrCreateChart('chart_denat_temp', {
     type:'line',
-    data:{ labels: times.map(t => t.toFixed(1)), datasets },
-    options:{ responsive:true, plugins:{ legend:{ position:'top' } }, scales:{ x:{title:{display:true,text:'시간 (분)'}}, y:{min:0,max:100,title:{display:true,text:'변성률 (%)'}} } }
+    data:{ labels: timesSec.map(t => t.toFixed(0)),
+      datasets: compareTemps.map((ct,i) => {
+        const ki = calcK(Ea,kref,Tref,ct);
+        return { label:ct+'°C', data:timesMin.map(t => (1-Math.exp(-ki*t))*100), borderColor:colors[i]||'#555', tension:0.3, fill:false };
+      })},
+    options:{ responsive:true, plugins:{legend:{position:'top'}},
+      scales:{ x:{title:{display:true,text:'시간 (초)'}}, y:{min:0,max:100,title:{display:true,text:'변성률 (%)'}} } }
   });
 }
 
 // ============================
-// TAB 2: STERILIZATION D/Z
+// TAB 5: 복합단백질
+// ============================
+function mp_updateBadge(n, val) {
+  const el = document.getElementById('mp_pct'+n+'_badge');
+  if (el) el.textContent = val + '%';
+  const sum = [1,2,3].reduce((a,i) => a + (parseFloat(document.getElementById('mp_pct'+i).value)||0), 0);
+  document.getElementById('mp_pct_warn').style.display = Math.abs(sum-100) > 0.5 ? '' : 'none';
+}
+
+function mp_loadProtein(n) {
+  const key = document.getElementById('mp_p'+n).value;
+  const p = PROTEINS[key];
+  document.getElementById('mp_Ea'+n).value   = p.Ea/1000;
+  document.getElementById('mp_kref'+n).value = p.kref;
+  document.getElementById('mp_Tref'+n).value = p.Tref;
+}
+
+function mp_preset(type) {
+  const presets = {
+    milk: {
+      proteins:['betalac','alphalac','casein'], pcts:[30,10,60],
+      concs:[3,1,6], temp:75, time:1800
+    },
+    egg: {
+      proteins:['ovalbumin','myosin','betalac'], pcts:[54,12,34],
+      concs:[5.4,1.2,3.4], temp:80, time:600
+    },
+    pork: {
+      proteins:['myosin','collagen','soy'], pcts:[60,20,20],
+      concs:[6,2,2], temp:72, time:900
+    },
+    soy: {
+      proteins:['soy','betalac','casein'], pcts:[70,20,10],
+      concs:[3.5,1,0.5], temp:90, time:1200
+    }
+  };
+  const pr = presets[type];
+  [1,2,3].forEach((n,i) => {
+    document.getElementById('mp_p'+n).value = pr.proteins[i];
+    document.getElementById('mp_pct'+n).value = pr.pcts[i];
+    document.getElementById('mp_C'+n).value = pr.concs[i];
+    mp_loadProtein(n);
+    mp_updateBadge(n, pr.pcts[i]);
+  });
+  document.getElementById('mp_temp').value = pr.temp;
+  document.getElementById('mp_time').value = pr.time;
+}
+
+function runMixedProtein() {
+  const T       = parseFloat(document.getElementById('mp_temp').value);
+  const tMaxSec = parseFloat(document.getElementById('mp_time').value);
+  const tMaxMin = tMaxSec / 60;
+
+  const proteins = [1,2,3].map(n => ({
+    name: PROTEINS[document.getElementById('mp_p'+n).value]?.name || 'P'+n,
+    pct:  parseFloat(document.getElementById('mp_pct'+n).value) || 0,
+    Ea:   parseFloat(document.getElementById('mp_Ea'+n).value) * 1000,
+    kref: parseFloat(document.getElementById('mp_kref'+n).value),
+    Tref: parseFloat(document.getElementById('mp_Tref'+n).value),
+    C0:   parseFloat(document.getElementById('mp_C'+n).value),
+  }));
+
+  const steps = 120;
+  const timesMin = Array.from({length:steps+1}, (_,i) => (i/steps)*tMaxMin);
+  const timesSec = timesMin.map(t => Math.round(t*60));
+  const colors = ['#1a6b3c','#2980b9','#e67e22','#8e44ad'];
+
+  const datasets = [];
+  const finalResults = [];
+
+  proteins.forEach((p,i) => {
+    const k = calcK(p.Ea, p.kref, p.Tref, T);
+    const nativePct = timesMin.map(t => Math.exp(-k*t)*100);
+    const finalNative = nativePct[steps];
+    finalResults.push({ ...p, finalNative, finalDenat: 100-finalNative, k });
+    datasets.push({
+      label: p.name + ' (' + p.pct + '%)',
+      data: nativePct,
+      borderColor: colors[i],
+      tension: 0.3, fill: false, borderWidth: 2
+    });
+  });
+
+  // weighted average
+  const totalPct = proteins.reduce((a,p) => a+p.pct, 0);
+  const weightedNative = timesMin.map((_,j) => {
+    return datasets.reduce((sum,ds,i) => sum + (proteins[i].pct/totalPct)*ds.data[j], 0);
+  });
+  datasets.push({
+    label: '가중 평균 (전체)',
+    data: weightedNative,
+    borderColor: '#c0392b',
+    borderDash: [6,3],
+    borderWidth: 3,
+    tension: 0.3, fill: false
+  });
+
+  getOrCreateChart('chart_mixed', {
+    type:'line',
+    data:{ labels: timesSec.map(t => t+'초'), datasets },
+    options:{ responsive:true, plugins:{legend:{position:'top'}},
+      scales:{ x:{title:{display:true,text:'시간 (초)'}}, y:{min:0,max:100,title:{display:true,text:'네이티브 단백질 (%)'}} } }
+  });
+
+  // temp comparison for weighted average
+  const tempRange = Array.from({length:21}, (_,i) => T-20+i*2).filter(t => t>=40 && t<=140);
+  const tempDatasets = proteins.map((p,i) => ({
+    label: p.name,
+    data: tempRange.map(ct => {
+      const ki = calcK(p.Ea, p.kref, p.Tref, ct);
+      return (1-Math.exp(-ki*tMaxMin))*100;
+    }),
+    borderColor: colors[i], tension:0.2, fill:false
+  }));
+  tempDatasets.push({
+    label:'가중 평균',
+    data: tempRange.map(ct => {
+      return proteins.reduce((sum,p) => {
+        const ki = calcK(p.Ea, p.kref, p.Tref, ct);
+        return sum + (p.pct/totalPct)*(1-Math.exp(-ki*tMaxMin))*100;
+      },0);
+    }),
+    borderColor:'#c0392b', borderDash:[5,3], borderWidth:3, tension:0.2, fill:false
+  });
+
+  getOrCreateChart('chart_mixed_temp', {
+    type:'line',
+    data:{ labels: tempRange, datasets: tempDatasets },
+    options:{ responsive:true, plugins:{legend:{position:'top'}},
+      scales:{ x:{title:{display:true,text:'온도 (°C)'}}, y:{min:0,max:100,title:{display:true,text:'변성률 (%)'}} } }
+  });
+
+  // result table
+  const tbody = document.getElementById('mp_result_body');
+  tbody.innerHTML = '';
+  finalResults.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.name}</td><td>${r.pct}%</td>
+      <td class="${r.finalDenat>80?'text-danger fw-bold':r.finalDenat>50?'text-warning':''}">${r.finalDenat.toFixed(1)}%</td>
+      <td>${r.finalNative.toFixed(1)}%</td>`;
+    tbody.appendChild(tr);
+  });
+
+  const wDenat = finalResults.reduce((s,r) => s+(r.pct/totalPct)*r.finalDenat, 0);
+  const wNative = 100-wDenat;
+  document.getElementById('mp_weighted_denat').textContent  = wDenat.toFixed(1) + '%';
+  document.getElementById('mp_weighted_native').textContent = wNative.toFixed(1) + '%';
+}
+
+// ============================
+// TAB 2: 살균
 // ============================
 function m1_onBugChange() {
   const key = document.getElementById('m1_bug').value;
@@ -598,12 +857,8 @@ function m1_onBugChange() {
   document.getElementById('m1_Dref').value = b.Dref;
   document.getElementById('m1_Tref').value = b.Tref;
   document.getElementById('m1_Z').value    = b.Z;
-  document.getElementById('m1_tempVal').textContent = b.Tref;
-  document.getElementById('m1_temp').value = Math.min(Math.max(b.Tref, 50), 135);
-}
-
-function calcD(Dref, Tref, Z, T) {
-  return Dref * Math.pow(10, (Tref - T) / Z);
+  document.getElementById('m1_temp').value = Math.min(Math.max(b.Tref,50),135);
+  document.getElementById('m1_tempVal').textContent = Math.min(Math.max(b.Tref,50),135);
 }
 
 function runSterilization() {
@@ -613,331 +868,133 @@ function runSterilization() {
   const Tref = parseFloat(document.getElementById('m1_Tref').value);
   const Z    = parseFloat(document.getElementById('m1_Z').value);
   const N0   = parseFloat(document.getElementById('m1_N0').value);
+  const DT   = calcD(Dref,Tref,Z,T);
+  const logRed = tMax/DT;
+  const N = N0*Math.pow(10,-logRed);
 
-  const DT = calcD(Dref, Tref, Z, T);
-  const logRed = tMax / DT;
-  const N = N0 * Math.pow(10, -logRed);
-  const pct = (1 - N/N0) * 100;
-
-  document.getElementById('r2_DT').textContent  = DT < 1 ? DT.toFixed(4)+' 분' : DT.toFixed(2)+' 분';
-  document.getElementById('r2_log').textContent = logRed.toFixed(2) + ' log 감소';
-  document.getElementById('r2_N').textContent   = N < 0.001 ? N.toExponential(2)+' CFU/g' : N.toFixed(2)+' CFU/g';
-  document.getElementById('r2_pct').textContent = pct.toFixed(4) + '%';
-
+  document.getElementById('r2_DT').textContent  = DT<1?DT.toFixed(4)+' 분':DT.toFixed(2)+' 분';
+  document.getElementById('r2_log').textContent = logRed.toFixed(2)+' log 감소';
+  document.getElementById('r2_N').textContent   = N<0.001?N.toExponential(2)+' CFU/g':N.toFixed(2)+' CFU/g';
+  document.getElementById('r2_pct').textContent = ((1-N/N0)*100).toFixed(4)+'%';
   const passEl = document.getElementById('r2_pass');
-  if (logRed >= 7) {
-    passEl.innerHTML = '<span class="badge bg-success">✅ 적정 (7D 이상)</span>';
-  } else if (logRed >= 5) {
-    passEl.innerHTML = '<span class="badge bg-warning text-dark">⚠️ 주의 (5~7D)</span>';
-  } else {
-    passEl.innerHTML = '<span class="badge bg-danger">❌ 부족 (&lt;5D)</span>';
-  }
+  passEl.innerHTML = logRed>=7 ? '<span class="badge bg-success">✅ 적정 (7D↑)</span>'
+    : logRed>=5 ? '<span class="badge bg-warning text-dark">⚠️ 주의 (5~7D)</span>'
+    : '<span class="badge bg-danger">❌ 부족 (&lt;5D)</span>';
 
-  // time series
-  const steps = 200;
-  const times = Array.from({length: steps+1}, (_, i) => (i/steps)*tMax);
-  const survivors = times.map(t => {
-    const lr = t / DT;
-    const n = N0 * Math.pow(10, -lr);
-    return Math.max(n, 1e-10);
-  });
-  const logSurv = survivors.map(n => Math.log10(n));
+  const steps=200, times=Array.from({length:steps+1},(_,i)=>(i/steps)*tMax);
+  getOrCreateChart('chart_steril',{type:'line',
+    data:{labels:times.map(t=>t.toFixed(2)),
+      datasets:[{label:'log₁₀(N)',data:times.map(t=>Math.log10(Math.max(N0*Math.pow(10,-t/DT),1e-10))),
+        borderColor:'#c0392b',backgroundColor:'rgba(192,57,43,0.08)',tension:0.1,fill:true}]},
+    options:{responsive:true,plugins:{legend:{position:'top'}},
+      scales:{x:{title:{display:true,text:'시간(분)'}},y:{title:{display:true,text:'log₁₀(N)'}}}}});
 
-  getOrCreateChart('chart_steril', {
-    type:'line',
-    data:{
-      labels: times.map(t => t.toFixed(2)),
-      datasets:[{ label:'log₁₀(N) (CFU/g)', data: logSurv, borderColor:'#c0392b', backgroundColor:'rgba(192,57,43,0.08)', tension:0.1, fill:true }]
-    },
-    options:{ responsive:true, plugins:{legend:{position:'top'}}, scales:{ x:{title:{display:true,text:'시간 (분)'}}, y:{title:{display:true,text:'log₁₀(N)'}} } }
-  });
+  const temps=Array.from({length:60},(_,i)=>Tref-20+i);
+  getOrCreateChart('chart_dvalue',{type:'line',
+    data:{labels:temps,datasets:[{label:'log₁₀(D값)',
+      data:temps.map(t=>Math.log10(calcD(Dref,Tref,Z,t))),borderColor:'#2980b9',tension:0.2,fill:false}]},
+    options:{responsive:true,plugins:{legend:{position:'top'}},
+      scales:{x:{title:{display:true,text:'온도(°C)'}},y:{title:{display:true,text:'log₁₀(D)분'}}}}});
 
-  // D-value vs temperature
-  const temps = Array.from({length:60}, (_,i) => Tref - 20 + i);
-  const Dvals = temps.map(t => Math.log10(calcD(Dref, Tref, Z, t)));
-  getOrCreateChart('chart_dvalue', {
-    type:'line',
-    data:{
-      labels: temps,
-      datasets:[{ label:'log₁₀(D값) (분)', data: Dvals, borderColor:'#2980b9', tension:0.2, fill:false }]
-    },
-    options:{ responsive:true, plugins:{legend:{position:'top'}}, scales:{ x:{title:{display:true,text:'온도 (°C)'}}, y:{title:{display:true,text:'log₁₀(D) (분)'}} } }
-  });
-
-  // table
-  const tbody = document.getElementById('m1_tableBody');
-  tbody.innerHTML = '';
-  const tableTemps = Array.from({length:13}, (_,i) => Tref - 6 + i*2);
-  tableTemps.forEach(t => {
-    const d = calcD(Dref, Tref, Z, t);
-    const t6log = d * 6;
-    const tr = document.createElement('tr');
-    if (Math.abs(t - T) < 1) tr.className = 'table-success';
-    tr.innerHTML = `<td>${t}°C</td><td>${d<1?d.toFixed(4):d.toFixed(2)}</td><td>${t6log<1?t6log.toFixed(3):t6log.toFixed(1)} 분</td>`;
+  const tbody=document.getElementById('m1_tableBody'); tbody.innerHTML='';
+  Array.from({length:13},(_,i)=>Tref-6+i*2).forEach(t=>{
+    const d=calcD(Dref,Tref,Z,t);
+    const tr=document.createElement('tr');
+    if(Math.abs(t-T)<1) tr.className='table-success';
+    tr.innerHTML=`<td>${t}°C</td><td>${d<1?d.toFixed(4):d.toFixed(2)}</td><td>${(d*6)<1?(d*6).toFixed(3):(d*6).toFixed(1)} 분</td>`;
     tbody.appendChild(tr);
   });
 }
 
 // ============================
-// TAB 3: F-VALUE
+// TAB 3: F값
 // ============================
 function f1_modeChange() {
-  const mode = document.getElementById('f1_mode').value;
-  document.getElementById('f1_const_block').style.display = mode === 'const' ? '' : 'none';
-  document.getElementById('f1_step_block').style.display  = mode === 'step'  ? '' : 'none';
+  const m=document.getElementById('f1_mode').value;
+  document.getElementById('f1_const_block').style.display=m==='const'?'':'none';
+  document.getElementById('f1_step_block').style.display=m==='step'?'':'none';
 }
-
 function f1_preset(type) {
-  if (type === 'steril') {
-    document.getElementById('f1_Tref').value = 121.1;
-    document.getElementById('f1_Z').value = 10;
-    document.getElementById('f1_temp').value = 121.1;
-    document.getElementById('f1_time').value = 15;
-    document.getElementById('f1_mode').value = 'const';
-    f1_modeChange();
-  } else if (type === 'past') {
-    document.getElementById('f1_Tref').value = 70;
-    document.getElementById('f1_Z').value = 5;
-    document.getElementById('f1_temp').value = 72;
-    document.getElementById('f1_time').value = 0.25;
-    document.getElementById('f1_mode').value = 'const';
-    f1_modeChange();
-  } else if (type === 'cook') {
-    document.getElementById('f1_Tref').value = 70;
-    document.getElementById('f1_Z').value = 7;
-    document.getElementById('f1_mode').value = 'step';
-    f1_modeChange();
-    document.getElementById('f1_profile').value = `0, 20\n5, 50\n10, 70\n15, 80\n25, 80\n30, 60\n35, 30`;
-  }
+  if(type==='steril'){document.getElementById('f1_Tref').value=121.1;document.getElementById('f1_Z').value=10;document.getElementById('f1_temp').value=121.1;document.getElementById('f1_time').value=15;document.getElementById('f1_mode').value='const';f1_modeChange();}
+  else if(type==='past'){document.getElementById('f1_Tref').value=70;document.getElementById('f1_Z').value=5;document.getElementById('f1_temp').value=72;document.getElementById('f1_time').value=0.25;document.getElementById('f1_mode').value='const';f1_modeChange();}
+  else{document.getElementById('f1_Tref').value=70;document.getElementById('f1_Z').value=7;document.getElementById('f1_mode').value='step';f1_modeChange();document.getElementById('f1_profile').value='0, 20\n5, 50\n10, 70\n15, 80\n25, 80\n30, 60\n35, 30';}
 }
-
-function parseProfile(text) {
-  return text.trim().split('\n').map(line => {
-    const parts = line.split(',');
-    return { t: parseFloat(parts[0]), T: parseFloat(parts[1]) };
-  }).filter(p => !isNaN(p.t) && !isNaN(p.T));
-}
-
-function buildProfile(pts, steps) {
-  const tMax = pts[pts.length-1].t;
-  const times = Array.from({length: steps+1}, (_,i) => (i/steps)*tMax);
-  const temps = times.map(t => {
-    let T = pts[0].T;
-    for (let i = 1; i < pts.length; i++) {
-      if (t <= pts[i].t) {
-        const frac = (t - pts[i-1].t) / (pts[i].t - pts[i-1].t);
-        T = pts[i-1].T + frac * (pts[i].T - pts[i-1].T);
-        break;
-      }
-      T = pts[pts.length-1].T;
-    }
-    return T;
-  });
-  return { times, temps };
-}
-
 function runFvalue() {
-  const Tref = parseFloat(document.getElementById('f1_Tref').value);
-  const Z    = parseFloat(document.getElementById('f1_Z').value);
-  const mode = document.getElementById('f1_mode').value;
-
-  let times, temps;
-  if (mode === 'const') {
-    const T    = parseFloat(document.getElementById('f1_temp').value);
-    const tMax = parseFloat(document.getElementById('f1_time').value);
-    const steps = 200;
-    times = Array.from({length: steps+1}, (_,i) => (i/steps)*tMax);
-    temps = Array.from({length: steps+1}, () => T);
+  const Tref=parseFloat(document.getElementById('f1_Tref').value),Z=parseFloat(document.getElementById('f1_Z').value);
+  const mode=document.getElementById('f1_mode').value;
+  let times,temps;
+  if(mode==='const'){
+    const T=parseFloat(document.getElementById('f1_temp').value),tMax=parseFloat(document.getElementById('f1_time').value);
+    times=Array.from({length:201},(_,i)=>(i/200)*tMax); temps=times.map(()=>T);
   } else {
-    const pts = parseProfile(document.getElementById('f1_profile').value);
-    if (pts.length < 2) { alert('최소 2개 이상의 시점을 입력하세요.'); return; }
-    const r = buildProfile(pts, 500);
-    times = r.times; temps = r.temps;
+    const pts=document.getElementById('f1_profile').value.trim().split('\n').map(l=>{const p=l.split(',');return{t:parseFloat(p[0]),T:parseFloat(p[1])};}).filter(p=>!isNaN(p.t)&&!isNaN(p.T));
+    if(pts.length<2){alert('최소 2개 입력');return;}
+    const tMax=pts[pts.length-1].t; times=Array.from({length:501},(_,i)=>(i/500)*tMax);
+    temps=times.map(t=>{let T=pts[0].T;for(let i=1;i<pts.length;i++){if(t<=pts[i].t){const f=(t-pts[i-1].t)/(pts[i].t-pts[i-1].t);T=pts[i-1].T+f*(pts[i].T-pts[i-1].T);break;}T=pts[pts.length-1].T;}return T;});
   }
-
-  const dt = times[1] - times[0];
-  let cumF = 0;
-  const cumFs = [0];
-  for (let i = 1; i < times.length; i++) {
-    cumF += Math.pow(10, (temps[i] - Tref) / Z) * dt;
-    cumFs.push(cumF);
-  }
-
-  const totalF = cumF;
-  const maxT = Math.max(...temps);
-  const totalTime = times[times.length-1];
-
-  document.getElementById('r3_F').textContent      = totalF.toFixed(3) + ' 분';
-  document.getElementById('r3_Tref').textContent   = Tref + ' °C';
-  document.getElementById('r3_Z').textContent      = Z + ' °C';
-  document.getElementById('r3_totalTime').textContent = totalTime.toFixed(1) + ' 분';
-  document.getElementById('r3_maxTemp').textContent = maxT.toFixed(1) + ' °C';
-
-  const passEl = document.getElementById('r3_pass');
-  if (Tref >= 120) {
-    if (totalF >= 3) passEl.innerHTML = '<span class="badge bg-success">✅ F₀ 기준 충족 (≥3분)</span>';
-    else             passEl.innerHTML = '<span class="badge bg-danger">❌ F₀ 기준 미달 (&lt;3분)</span>';
-  } else {
-    if (totalF >= 35) passEl.innerHTML = '<span class="badge bg-success">✅ P값 기준 충족 (≥35분)</span>';
-    else              passEl.innerHTML = '<span class="badge bg-warning text-dark">⚠️ P값 확인 필요</span>';
-  }
-
-  // sampling for chart (max 200 pts)
-  const step = Math.max(1, Math.floor(times.length / 200));
-  const tLabels = times.filter((_,i) => i % step === 0).map(t => t.toFixed(2));
-  const tTemps  = temps.filter((_,i)  => i % step === 0);
-  const tCumFs  = cumFs.filter((_,i)  => i % step === 0);
-
-  getOrCreateChart('chart_fvalue', {
-    type:'line',
-    data:{
-      labels: tLabels,
-      datasets:[
-        { label:'온도 (°C)', data: tTemps, borderColor:'#c0392b', yAxisID:'yT', tension:0.3, fill:false },
-        { label:'누적 F값 (분)', data: tCumFs, borderColor:'#2980b9', yAxisID:'yF', tension:0.3, fill:false, borderDash:[5,3] },
-      ]
-    },
-    options:{
-      responsive:true,
-      plugins:{ legend:{ position:'top' } },
-      scales:{
-        x:{ title:{ display:true, text:'시간 (분)' } },
-        yT:{ type:'linear', position:'left',  title:{ display:true, text:'온도 (°C)' }, grid:{ drawOnChartArea:true } },
-        yF:{ type:'linear', position:'right', title:{ display:true, text:'누적 F값 (분)' }, grid:{ drawOnChartArea:false } }
-      }
-    }
-  });
+  const dt=times[1]-times[0]; let cumF=0; const cumFs=[0];
+  for(let i=1;i<times.length;i++){cumF+=Math.pow(10,(temps[i]-Tref)/Z)*dt;cumFs.push(cumF);}
+  document.getElementById('r3_F').textContent=cumF.toFixed(3)+' 분';
+  document.getElementById('r3_Tref').textContent=Tref+' °C';
+  document.getElementById('r3_Z').textContent=Z+' °C';
+  document.getElementById('r3_totalTime').textContent=times[times.length-1].toFixed(1)+' 분';
+  document.getElementById('r3_maxTemp').textContent=Math.max(...temps).toFixed(1)+' °C';
+  const passEl=document.getElementById('r3_pass');
+  if(Tref>=120) passEl.innerHTML=cumF>=3?'<span class="badge bg-success">✅ F₀ 충족(≥3분)</span>':'<span class="badge bg-danger">❌ F₀ 미달</span>';
+  else passEl.innerHTML=cumF>=35?'<span class="badge bg-success">✅ P값 충족(≥35분)</span>':'<span class="badge bg-warning text-dark">⚠️ 확인 필요</span>';
+  const s=Math.max(1,Math.floor(times.length/200));
+  getOrCreateChart('chart_fvalue',{type:'line',
+    data:{labels:times.filter((_,i)=>i%s===0).map(t=>t.toFixed(2)),
+      datasets:[{label:'온도(°C)',data:temps.filter((_,i)=>i%s===0),borderColor:'#c0392b',yAxisID:'yT',tension:0.3,fill:false},
+               {label:'누적 F값(분)',data:cumFs.filter((_,i)=>i%s===0),borderColor:'#2980b9',yAxisID:'yF',tension:0.3,fill:false,borderDash:[5,3]}]},
+    options:{responsive:true,plugins:{legend:{position:'top'}},
+      scales:{x:{title:{display:true,text:'시간(분)'}},yT:{type:'linear',position:'left',title:{display:true,text:'온도(°C)'}},yF:{type:'linear',position:'right',title:{display:true,text:'누적 F값(분)'},grid:{drawOnChartArea:false}}}}});
 }
 
 // ============================
-// TAB 4: INTEGRATED SIMULATOR
+// TAB 4: 통합 공정
 // ============================
-function i1_proteinChange() {
-  const key = document.getElementById('i1_protein').value;
-  const p = PROTEINS[key];
-  document.getElementById('i1_Ea').value    = p.Ea/1000;
-  document.getElementById('i1_kref').value  = p.kref;
-  document.getElementById('i1_Tref_p').value = p.Tref;
+function i1_proteinChange(){const p=PROTEINS[document.getElementById('i1_protein').value];document.getElementById('i1_Ea').value=p.Ea/1000;document.getElementById('i1_kref').value=p.kref;document.getElementById('i1_Tref_p').value=p.Tref;}
+function runIntegrated(){
+  const T0=parseFloat(document.getElementById('i1_T0').value),ramp=parseFloat(document.getElementById('i1_ramp').value),Thold=parseFloat(document.getElementById('i1_Thold').value),hold=parseFloat(document.getElementById('i1_hold').value),Tend=parseFloat(document.getElementById('i1_Tend').value),cool=parseFloat(document.getElementById('i1_cool').value);
+  const totalTime=ramp+hold+cool,Ea=parseFloat(document.getElementById('i1_Ea').value)*1000,kref=parseFloat(document.getElementById('i1_kref').value),TrefP=parseFloat(document.getElementById('i1_Tref_p').value);
+  const Dref=parseFloat(document.getElementById('i1_Dref').value),TrefM=parseFloat(document.getElementById('i1_Tref_m').value),Z=parseFloat(document.getElementById('i1_Z').value),N0=parseFloat(document.getElementById('i1_N0').value);
+  const steps=500,dt=totalTime/steps,times=Array.from({length:steps+1},(_,i)=>i*dt);
+  const temps=times.map(t=>t<=ramp?T0+(Thold-T0)*(t/ramp):t<=ramp+hold?Thold:Thold+(Tend-Thold)*((t-ramp-hold)/cool));
+  let cumKdt=0; const nativePcts=[100];
+  for(let i=1;i<=steps;i++){cumKdt+=calcK(Ea,kref,TrefP,temps[i])*dt;nativePcts.push(Math.exp(-cumKdt)*100);}
+  let cumLogRed=0,F0=0,Pval=0; const logNs=[Math.log10(N0)];
+  for(let i=1;i<=steps;i++){const DT=calcD(Dref,TrefM,Z,temps[i]);cumLogRed+=dt/DT;logNs.push(Math.log10(N0)-cumLogRed);F0+=Math.pow(10,(temps[i]-121.1)/10)*dt;Pval+=Math.pow(10,(temps[i]-70)/5)*dt;}
+  const finalNative=nativePcts[steps],totalLogRed=cumLogRed,finalN=Math.pow(10,logNs[steps]);
+  document.getElementById('r4_maxT').textContent=Math.max(...temps).toFixed(1)+' °C';
+  document.getElementById('r4_totalT').textContent=totalTime.toFixed(0)+' 분';
+  document.getElementById('r4_denat').textContent=(100-finalNative).toFixed(1)+'%';
+  document.getElementById('r4_native').textContent=finalNative.toFixed(1)+'%';
+  document.getElementById('r4_logred').textContent=totalLogRed.toFixed(2)+' log 감소';
+  document.getElementById('r4_N').textContent=finalN<0.001?finalN.toExponential(2)+' CFU/g':finalN.toFixed(3)+' CFU/g';
+  document.getElementById('r4_F0').textContent=F0.toFixed(4)+' 분';
+  document.getElementById('r4_P').textContent=Pval.toFixed(2)+' 분';
+  const sg=[];
+  if(100-finalNative>80)sg.push('⚠️ 단백질 변성률 80% 이상. 온도/시간 단축 검토 필요.');
+  if(100-finalNative<10)sg.push('✅ 단백질 열변성 최소화 (10% 미만).');
+  if(totalLogRed<5)sg.push('❌ 살균 효과 부족 (5D 미만). 온도↑ 또는 유지시간↑ 권장.');
+  if(totalLogRed>=7)sg.push('✅ 살균 효과 적정 (7D 이상).');
+  if(F0>=3)sg.push('✅ F₀값 상업적 살균 기준(3분) 충족.');
+  else sg.push('ℹ️ F₀값 3분 미만. 저산성 식품(pH>4.6) 경우 추가 검토 필요.');
+  document.getElementById('r4_suggest').innerHTML=sg.map(s=>`<p class="mb-1">${s}</p>`).join('');
+  const ss=Math.max(1,Math.floor(steps/200));
+  getOrCreateChart('chart_integrated',{type:'line',
+    data:{labels:times.filter((_,i)=>i%ss===0).map(t=>t.toFixed(1)),
+      datasets:[{label:'온도(°C)',data:temps.filter((_,i)=>i%ss===0),borderColor:'#c0392b',yAxisID:'yT',tension:0.3,fill:false},
+               {label:'네이티브 단백질(%)',data:nativePcts.filter((_,i)=>i%ss===0),borderColor:'#1a6b3c',yAxisID:'yP',tension:0.3,fill:false},
+               {label:'log₁₀(N)',data:logNs.filter((_,i)=>i%ss===0),borderColor:'#8e44ad',yAxisID:'yN',tension:0.1,fill:false,borderDash:[4,3]}]},
+    options:{responsive:true,plugins:{legend:{position:'top'}},
+      scales:{x:{title:{display:true,text:'시간(분)'}},yT:{type:'linear',position:'left',title:{display:true,text:'온도(°C)'}},yP:{type:'linear',position:'right',title:{display:true,text:'네이티브(%)'},min:0,max:100,grid:{drawOnChartArea:false}},yN:{display:false,type:'linear',position:'right'}}}});
 }
 
-function runIntegrated() {
-  const T0   = parseFloat(document.getElementById('i1_T0').value);
-  const ramp = parseFloat(document.getElementById('i1_ramp').value);
-  const Thold= parseFloat(document.getElementById('i1_Thold').value);
-  const hold = parseFloat(document.getElementById('i1_hold').value);
-  const Tend = parseFloat(document.getElementById('i1_Tend').value);
-  const cool = parseFloat(document.getElementById('i1_cool').value);
-  const totalTime = ramp + hold + cool;
-
-  const Ea    = parseFloat(document.getElementById('i1_Ea').value) * 1000;
-  const kref  = parseFloat(document.getElementById('i1_kref').value);
-  const TrefP = parseFloat(document.getElementById('i1_Tref_p').value);
-  const Dref  = parseFloat(document.getElementById('i1_Dref').value);
-  const TrefM = parseFloat(document.getElementById('i1_Tref_m').value);
-  const Z     = parseFloat(document.getElementById('i1_Z').value);
-  const N0    = parseFloat(document.getElementById('i1_N0').value);
-
-  const steps = 500;
-  const dt = totalTime / steps;
-  const times = Array.from({length: steps+1}, (_,i) => i*dt);
-
-  // build temperature profile
-  const temps = times.map(t => {
-    if (t <= ramp) return T0 + (Thold - T0) * (t / ramp);
-    if (t <= ramp + hold) return Thold;
-    return Thold + (Tend - Thold) * ((t - ramp - hold) / cool);
-  });
-
-  // integrate protein denaturation (cumulative k*dt)
-  let cumKdt = 0;
-  const nativePcts = [100];
-  for (let i = 1; i <= steps; i++) {
-    const k = calcK(Ea, kref, TrefP, temps[i]);
-    cumKdt += k * dt;
-    nativePcts.push(Math.exp(-cumKdt) * 100);
-  }
-
-  // integrate microbial inactivation
-  let cumLogRed = 0;
-  const logNs = [Math.log10(N0)];
-  for (let i = 1; i <= steps; i++) {
-    const DT = calcD(Dref, TrefM, Z, temps[i]);
-    cumLogRed += dt / DT;
-    const logN = Math.log10(N0) - cumLogRed;
-    logNs.push(logN);
-  }
-
-  // F0 and P value
-  let F0 = 0, Pval = 0;
-  for (let i = 1; i <= steps; i++) {
-    F0   += Math.pow(10, (temps[i] - 121.1) / 10) * dt;
-    Pval += Math.pow(10, (temps[i] - 70.0)  / 5)  * dt;
-  }
-
-  const finalNative = nativePcts[steps];
-  const finalLogN   = logNs[steps];
-  const finalN      = Math.pow(10, finalLogN);
-  const totalLogRed = cumLogRed;
-
-  document.getElementById('r4_maxT').textContent   = Math.max(...temps).toFixed(1) + ' °C';
-  document.getElementById('r4_totalT').textContent  = totalTime.toFixed(0) + ' 분';
-  document.getElementById('r4_denat').textContent   = (100 - finalNative).toFixed(1) + '%';
-  document.getElementById('r4_native').textContent  = finalNative.toFixed(1) + '%';
-  document.getElementById('r4_logred').textContent  = totalLogRed.toFixed(2) + ' log 감소';
-  document.getElementById('r4_N').textContent       = finalN < 0.001 ? finalN.toExponential(2)+' CFU/g' : finalN.toFixed(3)+' CFU/g';
-  document.getElementById('r4_F0').textContent      = F0.toFixed(4) + ' 분';
-  document.getElementById('r4_P').textContent       = Pval.toFixed(2) + ' 분';
-
-  // optimization suggestions
-  const suggests = [];
-  if (100 - finalNative > 80) suggests.push('⚠️ 단백질 열변성률이 80% 이상입니다. 유지 온도를 낮추거나 시간을 단축하면 단백질 품질을 개선할 수 있습니다.');
-  if (100 - finalNative < 10) suggests.push('✅ 단백질 열변성이 최소화되었습니다 (10% 미만).');
-  if (totalLogRed < 5) suggests.push('❌ 살균 효과가 부족합니다 (5D 미만). 온도 상승 또는 유지 시간 연장을 권장합니다.');
-  if (totalLogRed >= 7) suggests.push('✅ 살균 효과가 적정합니다 (7D 이상).');
-  if (F0 >= 3) suggests.push('✅ F₀값이 상업적 살균 기준(3분)을 충족합니다.');
-  else suggests.push('ℹ️ F₀값이 3분 미만입니다. 저산성 식품(pH>4.6)의 경우 추가 검토가 필요합니다.');
-  if (ramp > hold) suggests.push('💡 승온 시간이 유지 시간보다 깁니다. 신속한 가열(빠른 CUT)로 에너지 효율과 품질을 동시에 개선할 수 있습니다.');
-
-  document.getElementById('r4_suggest').innerHTML = suggests.map(s => `<p class="mb-1">${s}</p>`).join('');
-
-  // chart sampling
-  const sampleStep = Math.max(1, Math.floor(steps / 200));
-  const tL  = times.filter((_,i)     => i % sampleStep === 0).map(t => t.toFixed(1));
-  const tT  = temps.filter((_,i)     => i % sampleStep === 0);
-  const tNP = nativePcts.filter((_,i) => i % sampleStep === 0);
-  const tLN = logNs.filter((_,i)     => i % sampleStep === 0);
-
-  getOrCreateChart('chart_integrated', {
-    type:'line',
-    data:{
-      labels: tL,
-      datasets:[
-        { label:'온도 (°C)',            data: tT,  borderColor:'#c0392b', yAxisID:'yT', tension:0.3, fill:false },
-        { label:'네이티브 단백질 (%)', data: tNP, borderColor:'#1a6b3c', yAxisID:'yP', tension:0.3, fill:false },
-        { label:'log₁₀(N) 생존균',    data: tLN, borderColor:'#8e44ad', yAxisID:'yN', tension:0.1, fill:false, borderDash:[4,3] },
-      ]
-    },
-    options:{
-      responsive:true,
-      plugins:{ legend:{ position:'top' } },
-      scales:{
-        x:{ title:{ display:true, text:'시간 (분)' } },
-        yT:{ type:'linear', position:'left',   title:{ display:true, text:'온도 (°C)' } },
-        yP:{ type:'linear', position:'right',  title:{ display:true, text:'네이티브 단백질 (%)' }, min:0, max:100, grid:{ drawOnChartArea:false } },
-        yN:{ type:'linear', position:'right',  title:{ display:true, text:'log₁₀(N)' }, display:false, grid:{ drawOnChartArea:false } }
-      }
-    }
-  });
-}
-
-// ============================
-// INIT
-// ============================
-document.addEventListener('DOMContentLoaded', () => {
-  runDenaturation();
-  runSterilization();
-  runFvalue();
-  runIntegrated();
+document.addEventListener('DOMContentLoaded',()=>{
+  mp_loadProtein(1); mp_loadProtein(2); mp_loadProtein(3);
+  runDenaturation(); runSterilization(); runFvalue(); runIntegrated(); runMixedProtein();
 });
 </script>
 </body>
