@@ -477,7 +477,9 @@
                     </table>
                   </div>
                   <div class="info-box mt-2" style="font-size:0.78rem">
-                    ⚠ <strong>신장 질환 환자:</strong> 인(P) 함량 있는 킬레이터(SHMP, 피로인산나트륨) 사용 시 혈중 인 상승 위험 — <strong>구연산나트륨 우선 권장</strong>
+                    ⚠ <strong>신장 질환 환자 (CKD):</strong> P 함유 킬레이터(인산염계·EDTA) 사용 시 고인혈증·이차성 부갑상선기능항진증 위험<br>
+                    ✓ 권장 순위: <strong>구연산나트륨 &gt; 글루콘산 &gt; 구연산·사과산(pH 모니터링 병행)</strong><br>
+                    △ 구연산/사과산: pH 강하 시 단백질 등전점 접근 → 별도 pH 완충 병행 필요
                   </div>
                 </div>
               </div>
@@ -1077,11 +1079,19 @@ function runCalciumRisk() {
   const toChelate_mg    = Math.max(0, freeCa_mg - targetFreeCa_mg);
   const toChelate_mmol  = toChelate_mg / 40.08;
 
+  // renal: 'yes'=신장식 적합, 'caution'=pH 강하 주의, 'no'=신장식 제한
   const CHELATORS = [
-    { name:'구연산나트륨 Na₃-Citrate·2H₂O', MW:294.10, bind:1, renal:true,  note:'신장식 적합 ✓ (P 없음)' },
-    { name:'헥사메타인산나트륨 SHMP',          MW:611.77, bind:6, renal:false, note:'P 함량 주의 — 신장식 제한' },
-    { name:'피로인산나트륨 Na₄P₂O₇',          MW:265.90, bind:2, renal:false, note:'P 함량 주의 — 신장식 제한' },
-    { name:'Na₂-EDTA',                        MW:336.21, bind:1, renal:false, note:'식품 기준 확인 필요, 극소량' },
+    // ── 비인계 P 없음 ─ 신장식 우선 권장 ──
+    { name:'구연산나트륨 Na₃Citrate·2H₂O', MW:294.10, bind:1, renal:'yes',     note:'신장식 최우선 권장 ✓ — P 없음, 킬레이트 우수, pH 유지' },
+    { name:'구연산 Citric Acid',            MW:192.12, bind:1, renal:'caution', note:'P 없음 △ — pH 강하 주의: 단백질 pI 접근 시 리스크 증가' },
+    { name:'사과산 Malic Acid',             MW:134.09, bind:1, renal:'caution', note:'P 없음 △ — pH 강하 완만, 킬레이트 중간 수준' },
+    { name:'글루콘산 Gluconic Acid',        MW:196.16, bind:1, renal:'yes',     note:'P 없음 ✓ — 약한 킬레이터, pH 강하 최소, 온화' },
+    // ── 인산염계 P 함유 ─ 신장식 주의·제한 ──
+    { name:'제2인산나트륨 Na₂HPO₄',        MW:141.96, bind:1, renal:'no',      note:'P 함량 ⚠ — 신장식 제한 (고인혈증 위험)' },
+    { name:'제2인산칼륨 K₂HPO₄',           MW:174.18, bind:1, renal:'no',      note:'K + P ⚠ — 신장식 이중 제한 (인·칼륨 동시 상승)' },
+    { name:'헥사메타인산나트륨 SHMP',        MW:611.77, bind:6, renal:'no',      note:'P 함량 ⚠ — 킬레이트 최강, 신장식 제한' },
+    { name:'피로인산나트륨 Na₄P₂O₇',        MW:265.90, bind:2, renal:'no',      note:'P 함량 ⚠ — 신장식 제한' },
+    { name:'Na₂-EDTA',                      MW:336.21, bind:1, renal:'no',      note:'식품 기준 확인 ⚠ — 고강도 킬레이터, 극소량' },
   ];
 
   const chelTitleEl = document.getElementById('cr_chelator_title');
@@ -1098,15 +1108,23 @@ function runCalciumRisk() {
       chelEl.innerHTML = CHELATORS.map(ch => {
         const mmolNeed = toChelate_mmol / ch.bind;
         const pct      = (mmolNeed * ch.MW / 1000).toFixed(3);
-        const flag     = ch.renal ? `<span style="color:#28a745">✓</span>` : `<span style="color:#fd7e14">⚠</span>`;
-        const pctColor = ch.renal ? '#28a745' : '#555';
-        return `<tr>
+        const flag     = ch.renal==='yes'     ? `<span style="color:#28a745">✓</span>`
+                       : ch.renal==='caution' ? `<span style="color:#e6a817">△</span>`
+                       :                        `<span style="color:#fd7e14">⚠</span>`;
+        const pctColor = ch.renal==='yes'     ? '#28a745'
+                       : ch.renal==='caution' ? '#e6a817' : '#888';
+        const rowBg    = ch.renal==='yes'     ? '' : ch.renal==='caution' ? 'background:#fffdf0' : 'background:#fff8f5';
+        return `<tr style="${rowBg}">
           <td>${flag} ${ch.name}</td>
           <td class="text-center">1:${ch.bind}</td>
           <td class="text-center fw-bold" style="color:${pctColor}">${pct}%</td>
           <td style="font-size:0.78rem">${ch.note}</td>
         </tr>`;
-      }).join('');
+      }).join('')
+      + `<tr style="background:#e8f4ee"><td colspan="4" style="font-size:0.78rem;color:#555">
+          📌 <strong>제3인산칼슘 Ca₃(PO₄)₂</strong>: 칼슘 원료를 이것으로 교체(이온화율 25%) 시 유효 Ca²⁺
+          <strong>${Math.round((1-0.25)*100)}% 저감</strong> 가능 — 킬레이터 불필요 (원료 선택 전략)
+        </td></tr>`;
     }
   }
 
