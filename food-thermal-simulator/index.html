@@ -353,11 +353,13 @@
               <div class="mb-2">
                 <label class="param-label">단백질 종류</label>
                 <select class="form-select form-select-sm" id="cr_ptype" onchange="runCalciumRisk()">
-                  <option value="casein">카제인 (Casein)</option>
-                  <option value="whey">유청단백질 (Whey)</option>
-                  <option value="mixed">혼합 유단백질</option>
-                  <option value="soy">대두단백질</option>
-                  <option value="egg">난백단백질</option>
+                  <option value="casein">카제인 Casein (pI 4.6 / 안정 pH 6.7)</option>
+                  <option value="whey">유청단백질 Whey (pI 5.1 / 안정 pH 6.5)</option>
+                  <option value="MPC">유단백농축물 MPC (pI 4.9 / 안정 pH 6.7)</option>
+                  <option value="MPI">유단백분리물 MPI (pI 5.0 / 안정 pH 6.7)</option>
+                  <option value="mixed">혼합 유단백질 (pI 5.0)</option>
+                  <option value="soy">대두단백질 (pI 4.6 / 안정 pH 7.0)</option>
+                  <option value="egg">난백단백질 (pI 4.8 / 안정 pH 7.5)</option>
                 </select>
               </div>
               <div class="mb-2">
@@ -392,11 +394,19 @@
                 <input type="number" class="form-control form-control-sm" id="cr_ph" value="7.0" step="0.1" min="3.0" max="9.0" oninput="runCalciumRisk()">
               </div>
               <button class="btn btn-primary w-100" onclick="runCalciumRisk()">▶ 리스크 분석</button>
-              <div class="formula-box mt-3" style="font-size:0.78rem">
-                <strong>리스크 모델 (sigmoid):</strong><br>
-                R_eff = Ca(mg) × 이온화율 / 단백질(g)<br>
-                Risk = sigmoid(R_eff, R₀_보정)<br>
-                R₀ 보정 = 온도·시간·pH 영향 반영
+              <div class="mt-2 p-2 border rounded" style="font-size:0.84rem;background:#f0f7ff">
+                <div class="form-check mb-0">
+                  <input class="form-check-input" type="checkbox" id="cr_use_denat" onchange="runCalciumRisk()">
+                  <label class="form-check-label fw-bold" for="cr_use_denat">🔗 복합단백질 열변성 효과 반영</label>
+                </div>
+                <div class="text-muted" style="font-size:0.76rem">복합단백질 탭 조성·파라미터 연동</div>
+                <div id="cr_denat_disp" style="display:none;font-size:0.77rem;color:#e67e22;margin-top:3px"></div>
+              </div>
+              <div class="formula-box mt-2" style="font-size:0.77rem">
+                <strong>pH 안정성 모델:</strong><br>
+                · pI 근접 → 전기적 반발력↓ → Ca²⁺ 가교↑<br>
+                · phFactor = f(|pH−pI|, |pH−pHopt|)<br>
+                · Risk_final = sigmoid(R_eff, R₀) × phFactor × [1+0.6×변성율]
               </div>
             </div>
           </div>
@@ -424,8 +434,9 @@
                         <tbody>
                           <tr><th style="width:48%">총 Ca:단백질 비율</th><td id="cr_ratio">-</td></tr>
                           <tr><th>유효 Ca²⁺ 비율</th><td id="cr_eff_ratio">-</td></tr>
+                          <tr><th>pH 안정성 인자</th><td id="cr_ph_factor" style="font-size:0.8rem">-</td></tr>
                           <tr><th>리스크 등급</th><td id="cr_level">-</td></tr>
-                          <tr><th>주요 위험 요인</th><td id="cr_factor" style="font-size:0.81rem">-</td></tr>
+                          <tr><th>주요 위험 요인</th><td id="cr_factor" style="font-size:0.8rem">-</td></tr>
                         </tbody>
                       </table>
                     </div>
@@ -444,6 +455,30 @@
                 <div class="card-header">💡 품질 개선 권고사항</div>
                 <div class="card-body">
                   <div id="cr_recommendations" class="formula-box" style="font-size:0.88rem">조건을 입력하고 분석을 실행하세요.</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">🧫 Free Ca²⁺ 킬레이터 권장 함량 (목표: Ca²⁺ 안전 수준으로 저감)</div>
+                <div class="card-body">
+                  <div class="small text-muted mb-2" id="cr_chelator_title">분석 실행 후 표시됩니다.</div>
+                  <div class="table-responsive">
+                    <table class="table table-sm table-bordered table-result mb-0" style="font-size:0.85rem">
+                      <thead><tr>
+                        <th>킬레이터 (나트륨염)</th>
+                        <th class="text-center" style="width:80px">결합비<br>Ca:킬레이터</th>
+                        <th class="text-center" style="width:90px">권장 함량<br>(g/100mL %)</th>
+                        <th>비고 (신장식 적합성)</th>
+                      </tr></thead>
+                      <tbody id="cr_chelator_table">
+                        <tr><td colspan="4" class="text-center text-muted">분석 실행 후 표시됩니다.</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="info-box mt-2" style="font-size:0.78rem">
+                    ⚠ <strong>신장 질환 환자:</strong> 인(P) 함량 있는 킬레이터(SHMP, 피로인산나트륨) 사용 시 혈중 인 상승 위험 — <strong>구연산나트륨 우선 권장</strong>
+                  </div>
                 </div>
               </div>
             </div>
@@ -898,11 +933,17 @@ const CR_PRESETS = {
 };
 
 const CR_PROTEINS = {
-  casein: { pI:4.6, R0:55, k:0.07, Tt:95, kTH:0.40, kTL:0.30 },
-  whey:   { pI:5.2, R0:38, k:0.09, Tt:70, kTH:0.50, kTL:0.25 },
-  mixed:  { pI:5.0, R0:45, k:0.08, Tt:78, kTH:0.45, kTL:0.28 },
-  soy:    { pI:4.5, R0:40, k:0.08, Tt:75, kTH:0.42, kTL:0.28 },
-  egg:    { pI:4.8, R0:32, k:0.10, Tt:65, kTH:0.50, kTL:0.30 },
+  // pI: 등전점 (이 pH에서 침전 위험 최대)
+  // pHopt: 최대 안정 pH (카제인 미셀은 pH 6.7 안정)
+  // R0: Ca:단백질 임계 비율 (mg Ca / g protein) — 기준 조건
+  // Tt: 열변성 개시 온도
+  casein: { pI:4.6,  pHopt:6.7, R0:55, k:0.07, Tt:95, kTH:0.40, kTL:0.30 },
+  whey:   { pI:5.1,  pHopt:6.5, R0:38, k:0.09, Tt:70, kTH:0.50, kTL:0.25 },
+  MPC:    { pI:4.9,  pHopt:6.7, R0:50, k:0.07, Tt:82, kTH:0.43, kTL:0.28 },
+  MPI:    { pI:5.0,  pHopt:6.7, R0:52, k:0.07, Tt:85, kTH:0.41, kTL:0.27 },
+  mixed:  { pI:5.0,  pHopt:6.6, R0:45, k:0.08, Tt:78, kTH:0.45, kTL:0.28 },
+  soy:    { pI:4.6,  pHopt:7.0, R0:40, k:0.08, Tt:75, kTH:0.42, kTL:0.28 },
+  egg:    { pI:4.8,  pHopt:7.5, R0:32, k:0.10, Tt:65, kTH:0.50, kTL:0.30 },
 };
 
 function cr_loadPreset(key) {
@@ -918,16 +959,45 @@ function cr_loadPreset(key) {
   runCalciumRisk();
 }
 
+function cr_phFactor(pH, pt) {
+  // pI 근접 → 단백질 순전하≈0 → Ca²⁺ 가교·응집 위험 최대 (×2.5~3)
+  // pHopt 근접 → 전기적 반발력 최대 → 안정 (×0.5)
+  const dpI  = Math.abs(pH - pt.pI);
+  const dpOp = Math.abs(pH - pt.pHopt);
+  const f = 0.8
+          + 2.2 * Math.exp(-0.5 * Math.pow(dpI  / 0.8, 2))
+          - 0.4 * Math.exp(-0.5 * Math.pow(dpOp / 1.2, 2));
+  return Math.max(0.5, Math.min(3.0, f));
+}
+
 function cr_calcRisk(R_eff, T, timeMin, pH, pt) {
-  const dTemp   = T - pt.Tt;
-  const R0_dT   = dTemp >= 0
+  const dTemp  = T - pt.Tt;
+  const R0_dT  = dTemp >= 0
     ? -Math.min(15, pt.kTH * dTemp)
     : +Math.min(18, pt.kTL * (-dTemp));
-  const R0_dt   = -Math.min(12, 12 * (1 - Math.exp(-timeMin / 20)));
-  const R0_dpH  = 8 * Math.exp(-0.8 * Math.abs(pH - pt.pI)) - 4;
-  const R0_eff  = pt.R0 + R0_dT + R0_dt - R0_dpH;
-  const risk    = 3 + 94 / (1 + Math.exp(-pt.k * (R_eff - R0_eff)));
-  return { risk: Math.min(96, Math.max(3, risk)), R0_eff };
+  const R0_dt  = -Math.min(12, 12 * (1 - Math.exp(-timeMin / 20)));
+  const R0_eff = pt.R0 + R0_dT + R0_dt;
+  const phF    = cr_phFactor(pH, pt);
+  const base   = 3 + 94 / (1 + Math.exp(-pt.k * (R_eff - R0_eff)));
+  const risk   = Math.min(96, Math.max(3, base * phF));
+  return { risk, R0_eff, phF };
+}
+
+function cr_getDenatFraction(T, tSec) {
+  const tMin = tSec / 60;
+  const ps = [1,2,3].map(n => ({
+    Ea:   (parseFloat(document.getElementById('mp_Ea'+n)?.value)   || 0) * 1000,
+    kref: parseFloat(document.getElementById('mp_kref'+n)?.value)  || 0,
+    Tref: parseFloat(document.getElementById('mp_Tref'+n)?.value)  || 75,
+    C0:   parseFloat(document.getElementById('mp_C'+n)?.value)     || 0,
+  }));
+  const totalC0 = ps.reduce((s,p) => s + p.C0, 0);
+  if (totalC0 <= 0) return 0;
+  return ps.reduce((s,p) => {
+    if (p.C0 <= 0 || p.kref <= 0) return s;
+    const k = calcK(p.Ea, p.kref, p.Tref, T);
+    return s + (p.C0 / totalC0) * (1 - Math.exp(-k * tMin));
+  }, 0);
 }
 
 function runCalciumRisk() {
@@ -938,6 +1008,7 @@ function runCalciumRisk() {
   const tSec      = parseFloat(document.getElementById('cr_time').value)     || 1200;
   const pH        = parseFloat(document.getElementById('cr_ph').value)       || 7.0;
   const ptype     = document.getElementById('cr_ptype').value || 'casein';
+  const useDenat  = document.getElementById('cr_use_denat')?.checked;
 
   if (proteinG <= 0) return;
 
@@ -945,7 +1016,15 @@ function runCalciumRisk() {
   const timeMin = tSec / 60;
   const R_total = calciumMg / proteinG;
   const R_eff   = (calciumMg * ionFactor) / proteinG;
-  const { risk, R0_eff } = cr_calcRisk(R_eff, T, timeMin, pH, pt);
+  const { risk: baseRisk, R0_eff, phF } = cr_calcRisk(R_eff, T, timeMin, pH, pt);
+
+  // 복합단백질 열변성 연동: 변성 단백질은 소수성 잔기 노출 → Ca²⁺ 결합 부위 증가
+  let denatFrac = 0;
+  let risk = baseRisk;
+  if (useDenat) {
+    denatFrac = cr_getDenatFraction(T, tSec);
+    risk = Math.min(96, baseRisk * (1 + 0.6 * denatFrac));
+  }
 
   let levelText, levelColor, recBg;
   if      (risk < 20) { levelText='✅ 낮음 (안전)';     levelColor='#28a745'; recBg='#d4edda'; }
@@ -954,11 +1033,11 @@ function runCalciumRisk() {
   else                { levelText='🔴 매우 높음 (심각)'; levelColor='#dc3545'; recBg='#f8d7da'; }
 
   const factors = [];
-  if (R_eff > R0_eff * 0.75) factors.push('Ca:단백질 비율 과다');
-  if (T - pt.Tt > 10)        factors.push(`고온 처리 (+${(T-pt.Tt).toFixed(0)}°C)`);
-  if (timeMin > 15)           factors.push(`장시간 처리 (${timeMin.toFixed(0)}분)`);
-  if (Math.abs(pH - pt.pI) < 1.5) factors.push('등전점 근접 pH');
-  const mainFactor = factors.length ? factors.join(' · ') : '현재 조건 양호';
+  if (R_eff > R0_eff * 0.8)            factors.push('Ca:단백질 비율 과다');
+  if (T - pt.Tt > 10)                   factors.push(`고온처리 (+${(T-pt.Tt).toFixed(0)}°C)`);
+  if (timeMin > 15)                     factors.push(`장시간 (${timeMin.toFixed(0)}분)`);
+  if (phF > 1.5)                        factors.push(`pH ${pH} ≈ pI ${pt.pI} (등전점 근접)`);
+  if (useDenat && denatFrac > 0.3)      factors.push(`열변성 ${(denatFrac*100).toFixed(0)}% → Ca²⁺ 노출↑`);
 
   // Gauge
   document.getElementById('cr_gauge_arc').setAttribute('stroke-dasharray', `${251.3 * risk / 100} 251.3`);
@@ -970,39 +1049,97 @@ function runCalciumRisk() {
   document.getElementById('cr_ratio').textContent     = R_total.toFixed(1) + ' mg Ca / g 단백질';
   document.getElementById('cr_eff_ratio').textContent = R_eff.toFixed(1)   + ' mg Ca²⁺ / g 단백질';
   document.getElementById('cr_level').innerHTML       = `<span style="color:${levelColor};font-weight:700">${levelText}</span>`;
-  document.getElementById('cr_factor').textContent    = mainFactor;
+  document.getElementById('cr_factor').textContent    = factors.length ? factors.join(' · ') : '현재 조건 양호';
 
-  // Recommendations
-  const safeCalcium = Math.round(R0_eff * 0.7 * proteinG / ionFactor);
+  // pH 안정성 인자 표시
+  const phStatus = phF < 0.7 ? '안정' : phF < 1.3 ? '주의' : phF < 2.0 ? '불안정' : '등전점 근접!';
+  const phEl = document.getElementById('cr_ph_factor');
+  if (phEl) {
+    phEl.textContent = `pH ${pH} (pI=${pt.pI}, 안정=${pt.pHopt}) → ×${phF.toFixed(2)} [${phStatus}]`;
+    phEl.style.color = phF > 1.8 ? '#dc3545' : phF > 1.2 ? '#fd7e14' : '#28a745';
+    phEl.style.fontWeight = phF > 1.5 ? '700' : 'normal';
+  }
+
+  // 복합단백질 연동 표시
+  const denatEl = document.getElementById('cr_denat_disp');
+  if (denatEl) {
+    if (useDenat) {
+      denatEl.textContent = `복합단백질 변성 ${(denatFrac*100).toFixed(1)}% → 리스크 ×${(1+0.6*denatFrac).toFixed(2)} (${baseRisk.toFixed(0)}% → ${risk.toFixed(0)}%)`;
+      denatEl.style.display = '';
+    } else { denatEl.style.display = 'none'; }
+  }
+
+  // ---- 킬레이터 계산 ----
+  // 목표: R_eff → R0_eff × 0.65 이하로 낮추기 위해 필요한 킬레이터 함량
+  const targetR_eff     = R0_eff * 0.65;
+  const targetFreeCa_mg = targetR_eff * proteinG;
+  const freeCa_mg       = calciumMg * ionFactor;
+  const toChelate_mg    = Math.max(0, freeCa_mg - targetFreeCa_mg);
+  const toChelate_mmol  = toChelate_mg / 40.08;
+
+  const CHELATORS = [
+    { name:'구연산나트륨 Na₃-Citrate·2H₂O', MW:294.10, bind:1, renal:true,  note:'신장식 적합 ✓ (P 없음)' },
+    { name:'헥사메타인산나트륨 SHMP',          MW:611.77, bind:6, renal:false, note:'P 함량 주의 — 신장식 제한' },
+    { name:'피로인산나트륨 Na₄P₂O₇',          MW:265.90, bind:2, renal:false, note:'P 함량 주의 — 신장식 제한' },
+    { name:'Na₂-EDTA',                        MW:336.21, bind:1, renal:false, note:'식품 기준 확인 필요, 극소량' },
+  ];
+
+  const chelTitleEl = document.getElementById('cr_chelator_title');
+  const chelEl      = document.getElementById('cr_chelator_table');
+  if (chelTitleEl) {
+    chelTitleEl.textContent = toChelate_mg > 0
+      ? `유효 Ca²⁺ ${toChelate_mg.toFixed(0)} mg/100mL 저감 필요 → 목표 ${targetFreeCa_mg.toFixed(0)} mg/100mL`
+      : '현재 Ca²⁺ 수준 적정 — 킬레이터 불필요';
+  }
+  if (chelEl) {
+    if (toChelate_mg <= 0) {
+      chelEl.innerHTML = `<tr><td colspan="4" class="text-success text-center">현재 Ca²⁺ 수준 안전 — 킬레이터 불필요</td></tr>`;
+    } else {
+      chelEl.innerHTML = CHELATORS.map(ch => {
+        const mmolNeed = toChelate_mmol / ch.bind;
+        const pct      = (mmolNeed * ch.MW / 1000).toFixed(3);
+        const flag     = ch.renal ? `<span style="color:#28a745">✓</span>` : `<span style="color:#fd7e14">⚠</span>`;
+        const pctColor = ch.renal ? '#28a745' : '#555';
+        return `<tr>
+          <td>${flag} ${ch.name}</td>
+          <td class="text-center">1:${ch.bind}</td>
+          <td class="text-center fw-bold" style="color:${pctColor}">${pct}%</td>
+          <td style="font-size:0.78rem">${ch.note}</td>
+        </tr>`;
+      }).join('');
+    }
+  }
+
+  // ---- 권고사항 ----
+  const safeCalcium = Math.round(targetFreeCa_mg / ionFactor);
   const recs = [];
   if (risk >= 65) {
-    recs.push(`🔴 <strong>즉시 조치 필요:</strong> 유효 Ca²⁺ 비율 ${R_eff.toFixed(1)} mg/g → 임계값 ${R0_eff.toFixed(1)} mg/g 초과 — 클레임(침전·혼탁) 발생 위험 높음`);
-    recs.push(`① 칼슘 함량 감소: ${calciumMg}mg/100mL → <strong>${safeCalcium}mg/100mL 이하</strong> 검토`);
-    recs.push(`② 칼슘 원료 교체: 이온화율 낮은 탄산칼슘(CaCO₃ 35%) 또는 제3인산칼슘(25%)으로 변경`);
-    recs.push(`③ 안정화제 추가: 카라기난 0.01~0.03% 또는 펙틴 0.1~0.3% — Ca²⁺-단백질 복합체 형성 억제`);
-    if (T > 100) recs.push(`④ 공정 전환 검토: 레토르트(${T}°C/${timeMin.toFixed(0)}분) → UHT(145°C/4초) — 열적 누적 손상 최소화`);
+    recs.push(`🔴 <strong>즉시 조치:</strong> 유효 Ca²⁺ ${R_eff.toFixed(1)} mg/g → 임계값 ${R0_eff.toFixed(1)} mg/g 초과 — 침전·혼탁 클레임 고위험`);
+    recs.push(`① 칼슘 함량 감소: ${calciumMg}mg → <strong>${safeCalcium}mg/100mL</strong> 이하 (총 칼슘 기준)`);
+    recs.push(`② 킬레이터 추가: <strong>구연산나트륨 ${((toChelate_mmol)*294.1/1000).toFixed(3)}%</strong> — 신장식에서 인(P) 부담 없는 유일 권장 킬레이터`);
+    recs.push(`③ pH ${pt.pHopt} 유지: 현재 pH ${pH} → pI ${pt.pI}에서 멀리 유지하면 전기적 반발력으로 Ca²⁺ 가교 억제`);
+    if (T > 100) recs.push(`④ 공정 전환: 레토르트(${T}°C/${timeMin.toFixed(0)}분) → UHT(145°C/4초) — 고온 단시간으로 누적 손상 최소화`);
   } else if (risk >= 40) {
-    recs.push(`🟠 <strong>개선 권고:</strong> 유효 Ca²⁺ 비율(${R_eff.toFixed(1)} mg/g)이 임계 범위 내 — 공정·조성 최적화 권장`);
-    recs.push(`① 칼슘 원료를 이온화율 낮은 원료(탄산칼슘·제3인산칼슘)로 교체 시 리스크 완화 가능`);
-    recs.push(`② pH 유지: 현재 ${pH} → 7.0~7.5 범위로 등전점(pI=${pt.pI})에서 원거리 유지`);
-    if (timeMin > 10) recs.push(`③ 처리 시간 단축: ${timeMin.toFixed(0)}분 → 10분 이내 목표`);
-    recs.push(`④ 목표 칼슘 안전 수준: <strong>${safeCalcium}mg/100mL 이하</strong> (현재 ${calciumMg}mg 대비)`);
+    recs.push(`🟠 <strong>개선 권고:</strong> Ca²⁺:단백질 비율 관리 필요`);
+    recs.push(`① 목표 칼슘: <strong>${safeCalcium}mg/100mL</strong> 이하 (현재 ${calciumMg}mg)`);
+    recs.push(`② 구연산나트륨 소량(${((toChelate_mmol)*294.1/1000*0.5).toFixed(3)}~${((toChelate_mmol)*294.1/1000).toFixed(3)}%) 첨가 검토`);
+    recs.push(`③ pH ${pt.pHopt} ± 0.3 유지 — 단백질 표면 음전하 최대화`);
+    if (phF > 1.5) recs.push(`④ 현재 pH ${pH}는 pI ${pt.pI}에 가까움 → pH 조정 우선 권장`);
   } else if (risk >= 20) {
-    recs.push(`🟡 <strong>모니터링 권고:</strong> 비율(${R_eff.toFixed(1)} mg/g) 관리 범위 내 — 정기 안정성 확인 권장`);
-    recs.push(`① 칼슘 함량 변경 시 반드시 재분석 실시`);
-    recs.push(`② 처리 온도·시간 상승 시 리스크 재평가 필요`);
-    recs.push(`③ 제품 보관 중 탁도·침전 정기 측정 실시`);
+    recs.push(`🟡 <strong>모니터링 권고:</strong> 현재 허용 범위 내`);
+    recs.push(`• pH ${pt.pHopt} ± 0.5 유지 및 정기 안정성 확인 권장`);
+    recs.push(`• 칼슘 함량·원료 변경 시 반드시 재분석 실시`);
   } else {
-    recs.push(`✅ <strong>안전 수준:</strong> 유효 Ca²⁺ 비율(${R_eff.toFixed(1)} mg/g) < 임계값(${R0_eff.toFixed(1)} mg/g) — 현 조성·공정 적합`);
-    recs.push(`• Ca²⁺-단백질 복합체 형성에 의한 침전·혼탁 리스크 낮음`);
-    recs.push(`• 정기 물리화학적 품질 모니터링(탁도, 입자크기, 점도) 유지 권장`);
+    recs.push(`✅ <strong>안전:</strong> 유효 Ca²⁺ 비율(${R_eff.toFixed(1)} mg/g) < 임계값(${R0_eff.toFixed(1)} mg/g)`);
+    recs.push(`• Ca²⁺-단백질 가교·침전 리스크 낮음 — 현 조성·공정 적합`);
+    recs.push(`• 탁도·입자크기·점도 정기 모니터링 유지 권장`);
   }
   const recEl = document.getElementById('cr_recommendations');
   recEl.style.background = recBg;
   recEl.style.borderColor = levelColor;
   recEl.innerHTML = recs.map(r => `<p class="mb-1">${r}</p>`).join('');
 
-  // Chart
+  // ---- 차트 ----
   const rRange  = Array.from({length:51}, (_,i) => i * 2);
   const cTemps  = [60, T, 121].filter((v,i,a) => a.indexOf(v)===i);
   const cColors = ['#3498db', '#e67e22', '#c0392b'];
