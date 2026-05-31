@@ -45,6 +45,7 @@
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab2">🦠 살균 (D/Z값)</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab3">📊 F값 계산기</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab4">🔄 통합 공정</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab6">🧪 Ca-단백질 리스크</button></li>
   </ul>
 
   <div class="tab-content">
@@ -326,6 +327,124 @@
             <div class="col-12">
               <div class="info-box">
                 💡 <strong>복합단백질 해석:</strong> 각 단백질은 열안정성이 다르므로 같은 온도·시간에서 변성 정도가 다릅니다. 가중 평균은 전체 단백질 혼합물의 평균 변성률을 나타냅니다.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB 6: Ca-단백질 변성 리스크 ===== -->
+    <div class="tab-pane fade" id="tab6">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="card h-100">
+            <div class="card-header">⚙️ 제품 조성 및 처리 조건</div>
+            <div class="card-body">
+              <div class="mb-3">
+                <label class="param-label">프리셋</label>
+                <div class="d-flex flex-wrap gap-1">
+                  <button class="btn btn-sm btn-success" onclick="cr_loadPreset('mediwell')">메디웰 신장식 유사</button>
+                  <button class="btn btn-sm btn-outline-secondary" onclick="cr_loadPreset('milk')">우유 HTST</button>
+                  <button class="btn btn-sm btn-outline-secondary" onclick="cr_loadPreset('soy')">두유</button>
+                  <button class="btn btn-sm btn-outline-secondary" onclick="cr_loadPreset('casoy')">Ca강화 두유</button>
+                </div>
+              </div>
+              <div class="mb-2">
+                <label class="param-label">단백질 종류</label>
+                <select class="form-select form-select-sm" id="cr_ptype" onchange="runCalciumRisk()">
+                  <option value="casein">카제인 (Casein)</option>
+                  <option value="whey">유청단백질 (Whey)</option>
+                  <option value="mixed">혼합 유단백질</option>
+                  <option value="soy">대두단백질</option>
+                  <option value="egg">난백단백질</option>
+                </select>
+              </div>
+              <div class="mb-2">
+                <label class="param-label">단백질 함량 (g/100mL)</label>
+                <input type="number" class="form-control form-control-sm" id="cr_protein" value="4.5" step="0.1" min="0.1" max="30" oninput="runCalciumRisk()">
+              </div>
+              <div class="mb-2">
+                <label class="param-label">칼슘 함량 (mg/100mL)</label>
+                <input type="number" class="form-control form-control-sm" id="cr_calcium" value="200" step="5" min="1" max="1000" oninput="runCalciumRisk()">
+              </div>
+              <div class="mb-2">
+                <label class="param-label">칼슘 원료 (이온화율 보정)</label>
+                <select class="form-select form-select-sm" id="cr_catype" onchange="runCalciumRisk()">
+                  <option value="1.0">총칼슘 기준 (보정 없음)</option>
+                  <option value="0.35">탄산칼슘 CaCO₃ (35%)</option>
+                  <option value="0.55">구연산칼슘 Ca-Citrate (55%)</option>
+                  <option value="0.70">젖산칼슘 Ca-Lactate (70%)</option>
+                  <option value="0.95">염화칼슘 CaCl₂ (95%)</option>
+                  <option value="0.25">제3인산칼슘 Ca-Phosphate (25%)</option>
+                </select>
+              </div>
+              <div class="mb-2">
+                <label class="param-label">처리 온도 (°C)</label>
+                <input type="number" class="form-control form-control-sm" id="cr_temp" value="121" step="1" min="50" max="145" oninput="runCalciumRisk()">
+              </div>
+              <div class="mb-2">
+                <label class="param-label">처리 시간 (초)</label>
+                <input type="number" class="form-control form-control-sm" id="cr_time" value="1200" step="30" min="1" max="7200" oninput="runCalciumRisk()">
+              </div>
+              <div class="mb-3">
+                <label class="param-label">제품 pH</label>
+                <input type="number" class="form-control form-control-sm" id="cr_ph" value="7.0" step="0.1" min="3.0" max="9.0" oninput="runCalciumRisk()">
+              </div>
+              <button class="btn btn-primary w-100" onclick="runCalciumRisk()">▶ 리스크 분석</button>
+              <div class="formula-box mt-3" style="font-size:0.78rem">
+                <strong>리스크 모델 (sigmoid):</strong><br>
+                R_eff = Ca(mg) × 이온화율 / 단백질(g)<br>
+                Risk = sigmoid(R_eff, R₀_보정)<br>
+                R₀ 보정 = 온도·시간·pH 영향 반영
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-8">
+          <div class="row g-3">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">🔬 칼슘-단백질 상호작용 변성 리스크 지수</div>
+                <div class="card-body">
+                  <div class="row align-items-center">
+                    <div class="col-5 text-center">
+                      <svg viewBox="0 0 200 115" style="width:100%;max-width:220px;">
+                        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e9ecef" stroke-width="20" stroke-linecap="round"/>
+                        <path id="cr_gauge_arc" d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#28a745" stroke-width="20" stroke-linecap="round" stroke-dasharray="0 251.3"/>
+                        <text x="100" y="82" text-anchor="middle" font-size="30" font-weight="bold" id="cr_gauge_pct" fill="#28a745">-</text>
+                        <text x="100" y="100" text-anchor="middle" font-size="11" fill="#666" id="cr_gauge_label">분석 대기</text>
+                        <text x="20" y="113" font-size="9" fill="#aaa">0%</text>
+                        <text x="166" y="113" font-size="9" fill="#aaa">100%</text>
+                      </svg>
+                      <div class="small text-muted">변성 리스크 지수</div>
+                    </div>
+                    <div class="col-7">
+                      <table class="table table-sm table-bordered table-result mb-0">
+                        <tbody>
+                          <tr><th style="width:48%">총 Ca:단백질 비율</th><td id="cr_ratio">-</td></tr>
+                          <tr><th>유효 Ca²⁺ 비율</th><td id="cr_eff_ratio">-</td></tr>
+                          <tr><th>리스크 등급</th><td id="cr_level">-</td></tr>
+                          <tr><th>주요 위험 요인</th><td id="cr_factor" style="font-size:0.81rem">-</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">📈 유효 Ca:단백질 비율에 따른 변성 리스크 곡선</div>
+                <div class="card-body"><canvas id="chart_ca_risk"></canvas></div>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">💡 품질 개선 권고사항</div>
+                <div class="card-body">
+                  <div id="cr_recommendations" class="formula-box" style="font-size:0.88rem">조건을 입력하고 분석을 실행하세요.</div>
+                </div>
               </div>
             </div>
           </div>
@@ -768,6 +887,148 @@ function mp_preset(type) {
   document.getElementById('mp_time').value = pr.time;
 }
 
+// ============================
+// TAB 6: Ca-단백질 변성 리스크
+// ============================
+const CR_PRESETS = {
+  mediwell: { ptype:'casein', protein:4.5, calcium:200, catype:'1.0',  temp:121, time:1200, ph:7.0 },
+  milk:     { ptype:'mixed',  protein:3.3, calcium:120, catype:'1.0',  temp:72,  time:15,   ph:6.8 },
+  soy:      { ptype:'soy',    protein:3.5, calcium:30,  catype:'1.0',  temp:75,  time:30,   ph:7.0 },
+  casoy:    { ptype:'soy',    protein:3.5, calcium:120, catype:'0.35', temp:75,  time:30,   ph:7.0 },
+};
+
+const CR_PROTEINS = {
+  casein: { pI:4.6, R0:55, k:0.07, Tt:95, kTH:0.40, kTL:0.30 },
+  whey:   { pI:5.2, R0:38, k:0.09, Tt:70, kTH:0.50, kTL:0.25 },
+  mixed:  { pI:5.0, R0:45, k:0.08, Tt:78, kTH:0.45, kTL:0.28 },
+  soy:    { pI:4.5, R0:40, k:0.08, Tt:75, kTH:0.42, kTL:0.28 },
+  egg:    { pI:4.8, R0:32, k:0.10, Tt:65, kTH:0.50, kTL:0.30 },
+};
+
+function cr_loadPreset(key) {
+  const pr = CR_PRESETS[key];
+  if (!pr) return;
+  document.getElementById('cr_ptype').value   = pr.ptype;
+  document.getElementById('cr_protein').value = pr.protein;
+  document.getElementById('cr_calcium').value = pr.calcium;
+  document.getElementById('cr_catype').value  = pr.catype;
+  document.getElementById('cr_temp').value    = pr.temp;
+  document.getElementById('cr_time').value    = pr.time;
+  document.getElementById('cr_ph').value      = pr.ph;
+  runCalciumRisk();
+}
+
+function cr_calcRisk(R_eff, T, timeMin, pH, pt) {
+  const dTemp   = T - pt.Tt;
+  const R0_dT   = dTemp >= 0
+    ? -Math.min(15, pt.kTH * dTemp)
+    : +Math.min(18, pt.kTL * (-dTemp));
+  const R0_dt   = -Math.min(12, 12 * (1 - Math.exp(-timeMin / 20)));
+  const R0_dpH  = 8 * Math.exp(-0.8 * Math.abs(pH - pt.pI)) - 4;
+  const R0_eff  = pt.R0 + R0_dT + R0_dt - R0_dpH;
+  const risk    = 3 + 94 / (1 + Math.exp(-pt.k * (R_eff - R0_eff)));
+  return { risk: Math.min(96, Math.max(3, risk)), R0_eff };
+}
+
+function runCalciumRisk() {
+  const proteinG  = parseFloat(document.getElementById('cr_protein').value)  || 0;
+  const calciumMg = parseFloat(document.getElementById('cr_calcium').value)  || 0;
+  const ionFactor = parseFloat(document.getElementById('cr_catype').value)   || 1.0;
+  const T         = parseFloat(document.getElementById('cr_temp').value)     || 121;
+  const tSec      = parseFloat(document.getElementById('cr_time').value)     || 1200;
+  const pH        = parseFloat(document.getElementById('cr_ph').value)       || 7.0;
+  const ptype     = document.getElementById('cr_ptype').value || 'casein';
+
+  if (proteinG <= 0) return;
+
+  const pt      = CR_PROTEINS[ptype];
+  const timeMin = tSec / 60;
+  const R_total = calciumMg / proteinG;
+  const R_eff   = (calciumMg * ionFactor) / proteinG;
+  const { risk, R0_eff } = cr_calcRisk(R_eff, T, timeMin, pH, pt);
+
+  let levelText, levelColor, recBg;
+  if      (risk < 20) { levelText='✅ 낮음 (안전)';     levelColor='#28a745'; recBg='#d4edda'; }
+  else if (risk < 40) { levelText='🟡 보통 (주의)';     levelColor='#e6a817'; recBg='#fff3cd'; }
+  else if (risk < 65) { levelText='🟠 높음 (위험)';     levelColor='#fd7e14'; recBg='#ffe5d0'; }
+  else                { levelText='🔴 매우 높음 (심각)'; levelColor='#dc3545'; recBg='#f8d7da'; }
+
+  const factors = [];
+  if (R_eff > R0_eff * 0.75) factors.push('Ca:단백질 비율 과다');
+  if (T - pt.Tt > 10)        factors.push(`고온 처리 (+${(T-pt.Tt).toFixed(0)}°C)`);
+  if (timeMin > 15)           factors.push(`장시간 처리 (${timeMin.toFixed(0)}분)`);
+  if (Math.abs(pH - pt.pI) < 1.5) factors.push('등전점 근접 pH');
+  const mainFactor = factors.length ? factors.join(' · ') : '현재 조건 양호';
+
+  // Gauge
+  document.getElementById('cr_gauge_arc').setAttribute('stroke-dasharray', `${251.3 * risk / 100} 251.3`);
+  document.getElementById('cr_gauge_arc').setAttribute('stroke', levelColor);
+  document.getElementById('cr_gauge_pct').textContent = risk.toFixed(0) + '%';
+  document.getElementById('cr_gauge_pct').setAttribute('fill', levelColor);
+  document.getElementById('cr_gauge_label').textContent = levelText.replace(/^\S+ /, '');
+
+  document.getElementById('cr_ratio').textContent     = R_total.toFixed(1) + ' mg Ca / g 단백질';
+  document.getElementById('cr_eff_ratio').textContent = R_eff.toFixed(1)   + ' mg Ca²⁺ / g 단백질';
+  document.getElementById('cr_level').innerHTML       = `<span style="color:${levelColor};font-weight:700">${levelText}</span>`;
+  document.getElementById('cr_factor').textContent    = mainFactor;
+
+  // Recommendations
+  const safeCalcium = Math.round(R0_eff * 0.7 * proteinG / ionFactor);
+  const recs = [];
+  if (risk >= 65) {
+    recs.push(`🔴 <strong>즉시 조치 필요:</strong> 유효 Ca²⁺ 비율 ${R_eff.toFixed(1)} mg/g → 임계값 ${R0_eff.toFixed(1)} mg/g 초과 — 클레임(침전·혼탁) 발생 위험 높음`);
+    recs.push(`① 칼슘 함량 감소: ${calciumMg}mg/100mL → <strong>${safeCalcium}mg/100mL 이하</strong> 검토`);
+    recs.push(`② 칼슘 원료 교체: 이온화율 낮은 탄산칼슘(CaCO₃ 35%) 또는 제3인산칼슘(25%)으로 변경`);
+    recs.push(`③ 안정화제 추가: 카라기난 0.01~0.03% 또는 펙틴 0.1~0.3% — Ca²⁺-단백질 복합체 형성 억제`);
+    if (T > 100) recs.push(`④ 공정 전환 검토: 레토르트(${T}°C/${timeMin.toFixed(0)}분) → UHT(145°C/4초) — 열적 누적 손상 최소화`);
+  } else if (risk >= 40) {
+    recs.push(`🟠 <strong>개선 권고:</strong> 유효 Ca²⁺ 비율(${R_eff.toFixed(1)} mg/g)이 임계 범위 내 — 공정·조성 최적화 권장`);
+    recs.push(`① 칼슘 원료를 이온화율 낮은 원료(탄산칼슘·제3인산칼슘)로 교체 시 리스크 완화 가능`);
+    recs.push(`② pH 유지: 현재 ${pH} → 7.0~7.5 범위로 등전점(pI=${pt.pI})에서 원거리 유지`);
+    if (timeMin > 10) recs.push(`③ 처리 시간 단축: ${timeMin.toFixed(0)}분 → 10분 이내 목표`);
+    recs.push(`④ 목표 칼슘 안전 수준: <strong>${safeCalcium}mg/100mL 이하</strong> (현재 ${calciumMg}mg 대비)`);
+  } else if (risk >= 20) {
+    recs.push(`🟡 <strong>모니터링 권고:</strong> 비율(${R_eff.toFixed(1)} mg/g) 관리 범위 내 — 정기 안정성 확인 권장`);
+    recs.push(`① 칼슘 함량 변경 시 반드시 재분석 실시`);
+    recs.push(`② 처리 온도·시간 상승 시 리스크 재평가 필요`);
+    recs.push(`③ 제품 보관 중 탁도·침전 정기 측정 실시`);
+  } else {
+    recs.push(`✅ <strong>안전 수준:</strong> 유효 Ca²⁺ 비율(${R_eff.toFixed(1)} mg/g) < 임계값(${R0_eff.toFixed(1)} mg/g) — 현 조성·공정 적합`);
+    recs.push(`• Ca²⁺-단백질 복합체 형성에 의한 침전·혼탁 리스크 낮음`);
+    recs.push(`• 정기 물리화학적 품질 모니터링(탁도, 입자크기, 점도) 유지 권장`);
+  }
+  const recEl = document.getElementById('cr_recommendations');
+  recEl.style.background = recBg;
+  recEl.style.borderColor = levelColor;
+  recEl.innerHTML = recs.map(r => `<p class="mb-1">${r}</p>`).join('');
+
+  // Chart
+  const rRange  = Array.from({length:51}, (_,i) => i * 2);
+  const cTemps  = [60, T, 121].filter((v,i,a) => a.indexOf(v)===i);
+  const cColors = ['#3498db', '#e67e22', '#c0392b'];
+  const datasets = cTemps.map((ct,ci) => ({
+    label: ct === T ? `현재 온도 ${ct}°C` : `${ct}°C`,
+    data:  rRange.map(r => cr_calcRisk(r, ct, timeMin, pH, pt).risk),
+    borderColor: cColors[ci], borderWidth: ct===T ? 3 : 1.5,
+    borderDash: ct===T ? [] : [5,3], tension:0.3, fill:false, pointRadius:0,
+  }));
+  const markerIdx = Math.min(50, Math.round(R_eff / 2));
+  datasets.push({
+    label: `현재 제품 (${R_eff.toFixed(1)} mg/g)`,
+    data:  rRange.map((_,i) => i===markerIdx ? risk : null),
+    pointRadius: 9, pointBackgroundColor: levelColor,
+    pointBorderColor:'#fff', pointBorderWidth:2, showLine:false,
+  });
+
+  getOrCreateChart('chart_ca_risk', {
+    type:'line',
+    data:{ labels: rRange.map(r => r+''), datasets },
+    options:{ responsive:true, plugins:{legend:{position:'top'}},
+      scales:{ x:{title:{display:true,text:'유효 Ca:단백질 비율 (mg Ca / g 단백질)'},ticks:{maxTicksLimit:11}},
+               y:{min:0,max:100,title:{display:true,text:'변성 리스크 (%)'}} } }
+  });
+}
+
 function runMixedProtein() {
   const T       = parseFloat(document.getElementById('mp_temp').value);
   const tMaxSec = parseFloat(document.getElementById('mp_time').value);
@@ -1023,7 +1284,7 @@ function runIntegrated(){
 
 document.addEventListener('DOMContentLoaded',()=>{
   mp_loadProtein(1); mp_loadProtein(2); mp_loadProtein(3);
-  runDenaturation(); runSterilization(); runFvalue(); runIntegrated(); runMixedProtein();
+  runDenaturation(); runSterilization(); runFvalue(); runIntegrated(); runMixedProtein(); runCalciumRisk();
 });
 </script>
 </body>
